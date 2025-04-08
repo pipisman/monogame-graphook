@@ -23,7 +23,7 @@ namespace graphook
             water = new List<Spring>();
             for (int i = 0; i < springAmount; i++)
             {
-                water.Add(new Spring(1f, 15f, 2f, new Vector2(100 + i * springOffset, 200), null, i, whiteTexture));
+                water.Add(new Spring(1f, 10f, 2f, new Vector2(0 + i * springOffset, 200 + 150), null, i, whiteTexture));
             }
             for (int i = 0; i < water.Count(); i++)
             {
