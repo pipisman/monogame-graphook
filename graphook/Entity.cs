@@ -84,11 +84,11 @@ namespace graphook
             {
                 if (newState.IsKeyDown(Keys.D))
                 {
-                    vel.X = 16;
+                    vel.X = 20;
                 }
                 if (newState.IsKeyDown(Keys.A))
                 {
-                    vel.X = -16;
+                    vel.X = -20;
                 }
             }
             if (newState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0)

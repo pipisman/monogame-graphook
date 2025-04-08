@@ -13,6 +13,9 @@ namespace graphook
         public Vector2 EmitterLocation { get; set; }
         private List<Particle_sin> particles;
         private List<Texture2D> textures;
+        double pi = 3.1415926535;
+        Effect saturationEffect;
+        double i, angle, x1, y1;
 
         public ParticleSystem_sin(List<Texture2D> textures, Vector2 location)
         {
@@ -22,14 +25,26 @@ namespace graphook
             random = new Random();
         }
 
-        public void Update()
+        public void Update(int type)
         {
-            int total = 10;
-
-            for (int i = 0; i < total; i++)
+            int radius;
+            
+            for (i = 0; i < 360; i += 6)
             {
-                particles.Add(GenerateNewParticle());
+
+                angle = i;
+                radius = 20;
+                if (type == 1) radius = 50;
+                    
+                x1 = radius * Math.Cos(angle * pi / 180);
+
+                y1 = radius * Math.Sin(angle * pi / 180);
+                
+                particles.Add(GenerateNewParticle((float)x1, (float)y1, type));
+
             }
+
+            
 
             for (int particle = 0; particle < particles.Count; particle++)
             {
@@ -42,20 +57,41 @@ namespace graphook
             }
         }
 
-        private Particle_sin GenerateNewParticle()
+        private Particle_sin GenerateNewParticle(float x, float y, int type)
         {
-            Texture2D texture = textures[random.Next(textures.Count)];
-            Vector2 position = EmitterLocation;
-            Vector2 velocity = new Vector2(
-                                    1f * (float)(random.NextDouble() * 4 - 2),
-                                    1f * (float)(random.NextDouble() * 2 - 4));
-            float angle = 0;
-            float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
-            Color color = new Color(255, 255, 255);
-            float size = (float)random.NextDouble();
-            int ttl = 20 + random.Next(40);
+            if (type == 0)
+            {
+                Texture2D texture = textures[random.Next(textures.Count)];
+                Vector2 position = new Vector2(x + EmitterLocation.X, y + EmitterLocation.Y);
+                Vector2 velocity = new Vector2(random.Next(0, 2) == 0 ? -1 : 1, 0);
 
-            return new Particle_sin(texture, position, velocity, angle, angularVelocity, color, size, ttl);
+                float angle = 0;
+                float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
+                Microsoft.Xna.Framework.Color color = new Microsoft.Xna.Framework.Color(255, 255, 255);
+                float size = (float)random.NextDouble();
+                int ttl = 40;
+
+                return new Particle_sin(texture, position, velocity, angle, angularVelocity, color, size, ttl);
+            }
+            else if (type == 1) {
+                Texture2D texture = textures[random.Next(textures.Count)];
+                Vector2 position = new Vector2(x + EmitterLocation.X, y + EmitterLocation.Y);
+                float pAngle = (float)Math.Atan2(EmitterLocation.Y - position.Y, EmitterLocation.X - position.X);
+                //Vector2 velocity = new Vector2((float)random.NextDouble() * 2 - 1 + 2 * (float)Math.Cos(pAngle), (float)random.NextDouble() * 2 - 1 + 2 * (float)Math.Sin(pAngle)); ;
+                Vector2 velocity = new Vector2(2 * (float)Math.Cos(pAngle), 2 * (float)Math.Sin(pAngle)); ;
+                float angle = 0;
+                float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
+                Microsoft.Xna.Framework.Color color = new Microsoft.Xna.Framework.Color(255, 255, 255);
+                float size = (float)random.NextDouble();
+                int ttl = 120;
+
+                return new Particle_sin(texture, position, velocity, angle, angularVelocity, color, size, ttl);
+            }
+            else
+            {
+                return null;
+            }
+
         }
 
         public void Draw(SpriteBatch spriteBatch)

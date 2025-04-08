@@ -30,15 +30,17 @@ namespace graphook
         GraphicsDeviceManager graphics;
         RenderTarget2D crosshairTarget;
         SpriteBatch spriteBatch;
-        ParticleSystem particleSystem;
+        ParticleSystem_sin particleSystem;
+        ParticleSystem_sin particleSystem2;
         waterController water;
-        
+        float cloudXoffset = 0;
         Collision collision1;
         Entity player;
         List<Collision> collisions = new List<Collision>();
         int mousex;
         int mousey;
         float hue;
+        Effect saturationEffect;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -47,30 +49,35 @@ namespace graphook
 
         protected override void Initialize()
         {
-
+            // Set the preferred resolution before calling base.Initialize()
+            graphics.PreferredBackBufferWidth = 960;  // Set width
+            graphics.PreferredBackBufferHeight = 540;  // Set height
+            graphics.ApplyChanges();
             base.Initialize();
         }
+
 
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             bloomCombineEffect = Content.Load<Effect>("BloomCombine");
-            
+            saturationEffect = Content.Load<Effect>("SaturationShader");
             Texture2D whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
             crosshair = Content.Load<Texture2D>("crosshair2");
             crosshairTarget = new RenderTarget2D(GraphicsDevice, crosshair.Width, crosshair.Height);
             List<Texture2D> textures = new List<Texture2D>();
             List<Texture2D> textures2 = new List<Texture2D>();
-            textures.Add(Content.Load<Texture2D>("amogus"));
+            textures.Add(Content.Load<Texture2D>("cloud"));
             textures2.Add(Content.Load<Texture2D>("amogus2"));
-            particleSystem = new ParticleSystem(textures, new Vector2(400, 240), 1);
+            particleSystem = new ParticleSystem_sin(textures, new Vector2(400, 240));
+            particleSystem2 = new ParticleSystem_sin(textures, new Vector2(0, 0));
             collisions.Add(new Collision(new Vector2(100, 100), 500, 20));
-            water = new waterController(180, 3, whiteTexture);
+            water = new waterController(330, 3, whiteTexture);
             int springAmount = 70;
             random = new Random();
             dd = 0;
-            
+                
             
             player = new Entity(collisions, textures2);
             
@@ -92,12 +99,15 @@ namespace graphook
 
 
             water.Update(gameTime, newState, random);
+            cloudXoffset += 0.3f;
             player.particleSystem.EmitterLocation = new Vector2(player.dcl._a.X + player.dcl.Width / 2, player.dcl._a.Y);
             player.particleSystem.Update();
-            particleSystem.EmitterLocation = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
-            particleSystem.Update();
+            
             hue += (float)gameTime.ElapsedGameTime.TotalSeconds * 200f;
-
+            particleSystem2.EmitterLocation = new Vector2(0, 0);
+            particleSystem2.Update(1);
+            particleSystem.EmitterLocation = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
+            particleSystem.Update(1);
             if (hue >= 360f) hue -= 360f;
             player.Update();
             base.Update(gameTime);
@@ -126,7 +136,7 @@ namespace graphook
         {
             
             GraphicsDevice.SetRenderTarget(crosshairTarget);
-            GraphicsDevice.Clear(Color.Transparent);
+            GraphicsDevice.Clear(new Color(68, 179, 248, 255));
             Color rainbowColor = ColorFromHSV(hue, 1f, 1f);
 
             spriteBatch.Begin();
@@ -135,10 +145,18 @@ namespace graphook
 
             
             GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(Color.Black);
-
-            
+            GraphicsDevice.Clear(new Color(68, 179, 248, 255));
+            particleSystem2.Draw(spriteBatch);
             particleSystem.Draw(spriteBatch);
+            particleSystem.EmitterLocation = new Vector2(cloudXoffset, 75);
+            particleSystem.Update(0);
+            particleSystem.Draw(spriteBatch);
+            particleSystem.EmitterLocation = new Vector2(cloudXoffset + 300, 200);
+            particleSystem.Update(0);
+            particleSystem.Draw(spriteBatch);
+
+
+
 
             spriteBatch.Begin();
             for (int i = 0; i < collisions.Count; i++)

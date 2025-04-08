@@ -25,6 +25,12 @@
 /processorParam:TextureFormat=Color
 /build:../../../../../Downloads/bg.png;bg.png
 
+#begin ../SaturationShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../SaturationShader.fx;SaturationShader.fx
+
 #begin ag.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -79,6 +85,18 @@
 /processorParam:DebugMode=Auto
 /build:BloomCombine.fx
 
+#begin cloud.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:cloud.png
+
 #begin colorpallete.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -132,4 +150,10 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:FireEffect.fx
+
+#begin SaturationShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:SaturationShader.fx
 
