@@ -45,7 +45,7 @@ internal class Spring
         if (Math.Abs(force) < 30f) return; // Don't bother with tiny forces
         
         externalForce += force;
-        Console.WriteLine($"Applying force to spring {numList}: {force}");
+        
 
         if (numList > 0)
         {
@@ -152,7 +152,7 @@ internal class Spring
             50,
             (int)(255 * (1 - depthFactor)),
             (int)(200 * (1 - 0.15f * depthFactor)),
-            200
+            170
         );
         Color waterColor = new Color(
             50,

@@ -22,7 +22,7 @@ namespace graphook
         public int Height { get; set; }
         public int coyoteFrames = 0;
         private List<Collision> collisions;
-
+        public bool colliding = false;
         //4 points
         public Vector2 _a;
         public Vector2 _b;
@@ -57,6 +57,7 @@ namespace graphook
                     && _b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
                     && _b.Y > collisions[i]._c.Y && _b.Y < collisions[i]._a.Y)
                 {
+                    colliding = true;
                     float v = _b.Y - collisions[i]._c.Y;
                     int diffY = Math.Abs((int)v);
                     int yOffset = 0;
@@ -75,9 +76,10 @@ namespace graphook
                         
                     coyoteFrames = 5;
                 }
-                if (_b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
+                else if (_b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
                     && _b.Y > collisions[i]._c.Y && _b.Y < collisions[i]._a.Y)
                 {
+                    colliding = true;
                     Debug.WriteLine("Collision detected at _b");
                     float v = _b.Y - collisions[i]._c.Y;
                     int diffY = Math.Abs((int)v);
@@ -97,9 +99,10 @@ namespace graphook
                         Debug.WriteLine("vertical");
                     }
                 }
-                if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
+                else if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
                     && _a.Y > collisions[i]._c.Y && _a.Y < collisions[i]._a.Y)
                 {
+                    colliding = true;
                     Debug.WriteLine("Collision detected at _a");
                     float v = _a.Y - collisions[i]._d.Y;
                     int diffY = Math.Abs((int)v);
@@ -119,9 +122,10 @@ namespace graphook
                         Debug.WriteLine("vertical");
                     }
                 }
-                if (_d.X > collisions[i]._c.X && _d.X < collisions[i]._d.X
+                else if (_d.X > collisions[i]._c.X && _d.X < collisions[i]._d.X
                     && _d.Y > collisions[i]._c.Y && _d.Y < collisions[i]._a.Y)
                 {
+                    colliding = true;
                     Debug.WriteLine("Collision detected at _a");
                     float v = _d.Y - collisions[i]._a.Y;
                     int diffY = Math.Abs((int)v);
@@ -140,9 +144,10 @@ namespace graphook
                         Debug.WriteLine("vertical");
                     }
                 }
-                if (_c.X > collisions[i]._c.X && _c.X < collisions[i]._d.X
+                else if (_c.X > collisions[i]._c.X && _c.X < collisions[i]._d.X
                     && _c.Y > collisions[i]._c.Y && _c.Y < collisions[i]._a.Y)
                 {
+                    colliding = true;
                     Debug.WriteLine("Collision detected at _a");
                     float v = _c.Y - collisions[i]._b.Y;
                     int diffY = Math.Abs((int)v);
@@ -160,10 +165,14 @@ namespace graphook
                         Position = new Vector2(Position.X + diffX, Position.Y);
                         Debug.WriteLine("vertical");
                     }
+                } else
+                {
+                    colliding = false;
                 }
                 
 
             }
+            coyoteFrames = 5;
             if (coyoteFrames > 6) { coyoteFrames--; }
         }
         private void DrawLine(SpriteBatch spriteBatch, Texture2D texture, Vector2 start, Vector2 end)

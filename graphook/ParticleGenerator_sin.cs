@@ -77,8 +77,8 @@ namespace graphook
                 Texture2D texture = textures[random.Next(textures.Count)];
                 Vector2 position = new Vector2(x + EmitterLocation.X, y + EmitterLocation.Y);
                 float pAngle = (float)Math.Atan2(EmitterLocation.Y - position.Y, EmitterLocation.X - position.X);
-                //Vector2 velocity = new Vector2((float)random.NextDouble() * 2 - 1 + 2 * (float)Math.Cos(pAngle), (float)random.NextDouble() * 2 - 1 + 2 * (float)Math.Sin(pAngle)); ;
-                Vector2 velocity = new Vector2(2 * (float)Math.Cos(pAngle), 2 * (float)Math.Sin(pAngle)); ;
+                Vector2 velocity = new Vector2((float)random.NextDouble() * 2 - 1 + 2 * (float)Math.Cos(pAngle), (float)random.NextDouble() * 2 - 1 + 2 * (float)Math.Sin(pAngle)); ;
+                
                 float angle = 0;
                 float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
                 Microsoft.Xna.Framework.Color color = new Microsoft.Xna.Framework.Color(255, 255, 255);

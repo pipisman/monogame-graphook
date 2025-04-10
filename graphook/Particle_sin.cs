@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.ComponentModel.Design;
-using System.Drawing;
+
 
 
 namespace graphook
@@ -37,8 +37,8 @@ namespace graphook
             Size = size;
             TTL = ttl;
             random = new Random();
-            //colorMod = new Color((int)((float)random.NextDouble() * 255), 255, 255);
-            colorMod = color;
+            colorMod = new Color((int)((float)random.NextDouble() * 255), 255, 255);
+            
         }
 
         public void Update()
