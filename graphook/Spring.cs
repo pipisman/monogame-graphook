@@ -146,7 +146,7 @@ internal class Spring
 
         float minY = 100f;
         float maxY = 300f;
-        float depthFactor = MathHelper.Clamp((Position - 250 - 20) / (maxY - minY), 0f, 1f);
+        float depthFactor = MathHelper.Clamp((Position - 250 + 10) / (maxY - minY), 0f, 1f);
         
         Color waterColor2 = new Color(
             50,

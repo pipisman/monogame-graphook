@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Transactions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.IO;
 using Microsoft.Xna.Framework.Media;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
-
+using System.Text.Json;
 namespace graphook
 {
     public class Game1 : Microsoft.Xna.Framework.Game
@@ -35,6 +37,7 @@ namespace graphook
         float cloudXoffset = 0;
         Collision collision1;
         Entity player;
+        List<clsData> cls;
         List<Collision> collisions = new List<Collision>();
         int mousex;
         int mousey;
@@ -67,13 +70,19 @@ namespace graphook
             crosshairTarget = new RenderTarget2D(GraphicsDevice, crosshair.Width, crosshair.Height);
             List<Texture2D> textures = new List<Texture2D>();
             List<Texture2D> textures2 = new List<Texture2D>();
-            textures.Add(Content.Load<Texture2D>("cloud"));
+            fireTexture = Content.Load<Texture2D>("cloud");
+            textures.Add(fireTexture);
             textures2.Add(Content.Load<Texture2D>("amogus2"));
             particleSystem = new ParticleSystem_sin(textures, new Vector2(400, 240));
-            collisions.Add(new Collision(new Vector2(150, 100), 30, 30));
-            collisions.Add(new Collision(new Vector2(400, 100), 30, 30));
             
-            collisions.Add(new Collision(new Vector2(100, 300), 40, 20));
+            Debug.WriteLine("Current directory: " + Directory.GetCurrentDirectory());
+            string json = File.ReadAllText("collisions.json");
+            cls = JsonSerializer.Deserialize<List<clsData>>(json);
+            foreach (var cl in cls)
+            {
+                collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height));
+            }
+            
             
             water = new waterController(330, 3, whiteTexture);
             int springAmount = 70;
@@ -82,6 +91,7 @@ namespace graphook
                 
             
             player = new Entity(collisions, textures2, spriteBatch);
+            player.dcl.player = player;
         }
 
         protected override void UnloadContent()
@@ -142,6 +152,11 @@ namespace graphook
             spriteBatch.End();
 
             
+
+
+
+
+            
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(new Color(68, 179, 248, 255));
             
@@ -156,14 +171,18 @@ namespace graphook
 
 
             spriteBatch.Begin();
+            
+            for (int i = 0; i < player.positions.Count(); i++)
+            {
+                spriteBatch.Draw(fireTexture, new Rectangle((int)player.positions[i].X, (int)player.positions[i].Y, fireTexture.Width, fireTexture.Height),
+                    new Color(random.Next(100, 165), random.Next(40, 110), random.Next(0, 80)));
+            }
+            player.positions.Clear();
             for (int i = 0; i < collisions.Count; i++)
             {
                 collisions[i].Draw(spriteBatch);
             }
-            if (player.isActivated)
-            {
-                player.DrawLine(spriteBatch, player.whiteTexture, player.dcl.Position, player.center);
-            }
+            
             player.dcl.Draw(spriteBatch);
             water.Draw(spriteBatch);
             mousex = Mouse.GetState().X;

@@ -14,6 +14,7 @@ namespace graphook
     internal class Entity
     {
         public bool playable;
+        
         private float i;
         public int id;
         double pi = 3.1415926535;
@@ -26,6 +27,7 @@ namespace graphook
         private MouseState previousMouseState;
         private MouseState currentMouseState;
         private MouseState huh;
+        public Vector2 prp;
         private Vector2 vel2;
         int subpx;
         bool unTouchable;
@@ -35,8 +37,11 @@ namespace graphook
         public bool isActivated;
         raycast ray;
         float ab;
+        public Texture2D texture;
         public Texture2D whiteTexture;
+        public List<Vector2> positions = [];
         int av;
+        private Random random;
         float b;
         float x1;
         float y1;
@@ -49,32 +54,103 @@ namespace graphook
             whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
             this.spriteBatch = spriteBatch;
+            random = new Random();
+            dcl.isActivated = isActivated;
         }
 
         private void Move(float i, float triRad, Vector2 center)
         {
-            
+            positions = [];
 
             float angle = i;
+            for (int k = 0; k < triRad / 5; k++)
+            {
+                double ghX1 = k * 5 * Math.Cos(angle * pi / 180);
 
+                double ghY1 = k * 5 * Math.Sin(angle * pi / 180);
+
+                positions.Add(new Vector2((float)ghX1 + center.X + random.Next(-1, 2), (float)ghY1 + center.Y + random.Next(-1, 2)));
+            }
             double x1 = triRad * Math.Cos(angle * pi / 180);
 
             double y1 = triRad * Math.Sin(angle * pi / 180);
 
-            
+            if (x1 < 0)
+            {
+                float ac = i + 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
+                double x2 = triRad * Math.Cos(ac * pi / 180);
+
+                double y2 = triRad * Math.Sin(ac * pi / 180);
+                for (int y = 0; y < collisions.Count; y++) {
+                    if (x2 > collisions[y]._c.X && x2 < collisions[y]._d.X
+                    && y2 > collisions[y]._c.Y && y2 < collisions[y]._a.Y)
+                    {
+                        dcl.Position = prp;
+                        isActivated = false;
+                        return;
+                    }
+                }
+                ac += 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
+                x2 = triRad * Math.Cos(ac * pi / 180);
+
+                y2 = triRad * Math.Sin(ac * pi / 180);
+                for (int y = 0; y < collisions.Count; y++)
+                {
+                    if (x2 > collisions[y]._c.X && x2 < collisions[y]._d.X
+                    && y2 > collisions[y]._c.Y && y2 < collisions[y]._a.Y)
+                    {
+                        dcl.Position = prp;
+                        isActivated = false;
+                        return;
+                    }
+                }
+            } else if (x1 > 0)
+            {
+                float ac = i + 4f + (5 - ab / 30);
+                double x2 = triRad * Math.Cos(ac * pi / 180);
+
+                double y2 = triRad * Math.Sin(ac * pi / 180);
+                for (int y = 0; y < collisions.Count; y++)
+                {
+                    if (x2 > collisions[y]._c.X && x2 < collisions[y]._d.X
+                    && y2 > collisions[y]._c.Y && y2 < collisions[y]._a.Y)
+                    {
+                        dcl.Position = prp;
+                        isActivated = false;
+                        return;
+                    }
+                }
+                ac += 4f + (5 - ab / 30);
+                x2 = triRad * Math.Cos(ac * pi / 180);
+
+                x2 = triRad * Math.Sin(ac * pi / 180);
+                for (int y = 0; y < collisions.Count; y++)
+                {
+                    if (x2 > collisions[y]._c.X && x2 < collisions[y]._d.X
+                    && y2 > collisions[y]._c.Y && y2 < collisions[y]._a.Y)
+                    {
+                        dcl.Position = prp;
+                        isActivated = false;
+                        return;
+                    }
+                }
+            }
+
+            prp = dcl.Position;
             dcl.Position = new Vector2(center.X + (float)x1, center.Y + (float)y1);
         }
         public void Update()
         {
+
             Debug.WriteLine(dcl.Position.X);
             Debug.WriteLine(dcl.Position.Y);
             KeyboardState newState = Keyboard.GetState();
             if (vel.X > 0) { vel.X -= 1; }
             if (vel.X < 0) { vel.X += 1; }
-            if (vel2.Y > 0) { vel2.Y -= 0.5f; }
-            if (vel2.Y < 0) { vel2.Y += 0.5f; }
-            if (vel2.X > 0) { vel2.X -= 0.5f; }
-            if (vel2.X < 0) { vel2.X += 0.5f; }
+            if (vel2.Y > 0) { vel2.Y -= 0.4f; }
+            if (vel2.Y < 0) { vel2.Y += 0.4f; }
+            if (vel2.X > 0) { vel2.X -= 0.4f; }
+            if (vel2.X < 0) { vel2.X += 0.4f; }
             if (vel2.X < 1 && vel2.X > -1) { vel2.X = 0; }
             if (vel2.Y < 1 && vel2.Y > -1) { vel2.Y = 0; }
 
@@ -126,12 +202,14 @@ namespace graphook
             {
                 vel.Y = -54;
                 dcl.coyoteFrames = 0;
+
                 particleFrames = 6;
                 
             }
-            if (particleFrames > 0) { 
+            if (particleFrames > 0) {
                 particleFrames--;
                 particleSystem.SpawnParticles();
+                
             }
 
             
@@ -166,18 +244,52 @@ namespace graphook
                 }
             }
             if (isActivated) {
+                if (dcl.colliding)
+                {
+                    isActivated = false;
+                    return;
+                }
+                if (newState.IsKeyDown(Keys.Space))
+                {
+                    if (dcl.colliding)
+                    {
+                        isActivated = false;
+                        return;
+                    }
+                    isActivated = false;
+                    float angle = b;
+
+                    double x1 = ab * Math.Cos(angle * pi / 180);
+
+                    double y1 = ab * Math.Sin(angle * pi / 180);
+
+
+
+                    vel2 = new Vector2(ab * (float)pi * 2 / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                        center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 2 / 90 * (float)Math.Sin(
+                            (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                                center.X + (float)x1 - dcl.Position.X)));
+
+                    Move(b, ab, center);
+                    return;
+                }
                 Move(b, ab, center);
+                 
                 
+
                 if (x1 < 0)
                 {
                     
-                    
-                    
+
+
                     b -= 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
 
 
                     if ((b < i - (180 - ab / 60) )|| dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
-                previousMouseState.RightButton == ButtonState.Released) {
+                        previousMouseState.RightButton == ButtonState.Released)
+                    {
+                        
+                        
                         float angle = b;
 
                         double x1 = ab * Math.Cos(angle * pi / 180);
@@ -186,47 +298,54 @@ namespace graphook
 
 
                         
-                        vel2 = new Vector2(ab * (float)pi * 4 / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                            center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 4 / 90 * (float)Math.Sin(
+                        vel2 = new Vector2(ab * (float)pi * 4f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                            center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 4f / 90 * (float)Math.Sin(
                                 (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                                     center.X + (float)x1 - dcl.Position.X)));
                         isActivated = false;
 
                     }
                 } else if (x1 > 0) {
+                    
                     b += 4f + (5 - ab / 30);
                     //if (b > i + 70)
 
                     
                     
+
                     if ((b > i + (180 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
                 previousMouseState.RightButton == ButtonState.Released)
                     {
-                    
-                        float angle = b;
+                        
+                        {
+                            
+                            float angle = b;
 
-                        double x1 = ab * Math.Cos(angle * pi / 180);
+                            double x1 = ab * Math.Cos(angle * pi / 180);
 
-                        double y1 = ab * Math.Sin(angle * pi / 180);
+                            double y1 = ab * Math.Sin(angle * pi / 180);
 
 
 
-                        vel2 = new Vector2(ab * (float)pi * 4 / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                            center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 4 / 90 * (float)Math.Sin(
-                                (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                                    center.X + (float)x1 - dcl.Position.X)));
-                        isActivated = false;
+                            vel2 = new Vector2(ab * (float)pi * 4f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                                center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 4f / 90 * (float)Math.Sin(
+                                    (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                                        center.X + (float)x1 - dcl.Position.X)));
+                            isActivated = false;
+                        }
+                        
                     }
                 }
                 
             }
             
             subpx /= 4;
-            dcl.PreviousPosition = dcl.Position; 
+            dcl.PreviousPosition = dcl.Position;
+            prp = dcl.Position;
             dcl.Position = new Vector2((int)vel.X / 10 + vel2.X + dcl.Position.X + subpx, (int)vel.Y / 10 + vel2.Y + dcl.Position.Y + subpy / 10);
 
-            
 
+            dcl.isActivated = isActivated;
             //Mouse.GetState().X
             dcl.Update();
         }
@@ -234,7 +353,7 @@ namespace graphook
         {
             spriteBatch.Draw(texture, start, null, Microsoft.Xna.Framework.Color.Brown,
                              (float)Math.Atan2(end.Y - start.Y, end.X - start.X),
-                             new Vector2(0f, (float)texture.Height / 2),
+                             new Vector2(0f, (float)texture.Height),
                              new Vector2(Vector2.Distance(start, end), 1f),
                              SpriteEffects.None, 0f);
         }

@@ -24,6 +24,8 @@ namespace graphook
         private List<Collision> collisions;
         public bool colliding = false;
         //4 points
+        public Entity player;
+        public bool isActivated;
         public Vector2 _a;
         public Vector2 _b;
         public Vector2 _c;
@@ -31,6 +33,7 @@ namespace graphook
 
         public DCollision(Vector2 position, Vector2 previousPosition, int width, int height, List<Collision> Collisions)
         {
+            
             PreviousPosition = previousPosition;
             Position = position;
             Width = width;
@@ -40,11 +43,12 @@ namespace graphook
             _c = new Vector2(position.X, position.Y);
             _d = new Vector2(position.X + width, position.Y);
             collisions = Collisions;
-            
+
         }
         public void Update()
         {
-            
+            isActivated = player.isActivated;
+
             _a = new Vector2(Position.X, Position.Y + Height);
             _b = new Vector2(Position.X + Height, Position.Y + Height);
             _c = new Vector2(Position.X, Position.Y);
@@ -57,10 +61,16 @@ namespace graphook
                     && _b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
                     && _b.Y > collisions[i]._c.Y && _b.Y < collisions[i]._a.Y)
                 {
+                    if (isActivated)
+                    {
+                        Position = player.prp;
+                        return;
+                    }
                     colliding = true;
                     float v = _b.Y - collisions[i]._c.Y;
                     int diffY = Math.Abs((int)v);
                     int yOffset = 0;
+                    coyoteFrames = 9;
                     while (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
                     && _a.Y > collisions[i]._c.Y && _a.Y < collisions[i]._a.Y
                     && _b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
@@ -73,20 +83,27 @@ namespace graphook
                         _c = new Vector2(Position.X, Position.Y);
                         _d = new Vector2(Position.X + Height, Position.Y);
                     }
-                        
+
                     coyoteFrames = 5;
                 }
                 else if (_b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
                     && _b.Y > collisions[i]._c.Y && _b.Y < collisions[i]._a.Y)
                 {
+                    if (isActivated)
+                    {
+                        player.isActivated = false;
+                        Position = player.prp;
+                        return;
+                    }
+                    coyoteFrames = 9;
                     colliding = true;
                     Debug.WriteLine("Collision detected at _b");
                     float v = _b.Y - collisions[i]._c.Y;
                     int diffY = Math.Abs((int)v);
-                    
+
                     float b = _b.X - collisions[i]._c.X;
                     int diffX = Math.Abs((int)b);
-                    
+
                     if (diffX > diffY)
                     {
                         Position = new Vector2(Position.X, Position.Y - diffY);
@@ -102,6 +119,13 @@ namespace graphook
                 else if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
                     && _a.Y > collisions[i]._c.Y && _a.Y < collisions[i]._a.Y)
                 {
+                    if (isActivated)
+                    {
+                        player.isActivated = false;
+                        Position = player.prp;
+                        return;
+                    }
+                    coyoteFrames = 9;
                     colliding = true;
                     Debug.WriteLine("Collision detected at _a");
                     float v = _a.Y - collisions[i]._d.Y;
@@ -125,6 +149,12 @@ namespace graphook
                 else if (_d.X > collisions[i]._c.X && _d.X < collisions[i]._d.X
                     && _d.Y > collisions[i]._c.Y && _d.Y < collisions[i]._a.Y)
                 {
+                    if (isActivated)
+                    {
+                        player.isActivated = false;
+                        Position = player.prp;
+                        return;
+                    }
                     colliding = true;
                     Debug.WriteLine("Collision detected at _a");
                     float v = _d.Y - collisions[i]._a.Y;
@@ -147,6 +177,12 @@ namespace graphook
                 else if (_c.X > collisions[i]._c.X && _c.X < collisions[i]._d.X
                     && _c.Y > collisions[i]._c.Y && _c.Y < collisions[i]._a.Y)
                 {
+                    if (isActivated)
+                    {
+                        player.isActivated = false;
+                        Position = player.prp;
+                        return;
+                    }
                     colliding = true;
                     Debug.WriteLine("Collision detected at _a");
                     float v = _c.Y - collisions[i]._b.Y;
@@ -165,15 +201,16 @@ namespace graphook
                         Position = new Vector2(Position.X + diffX, Position.Y);
                         Debug.WriteLine("vertical");
                     }
-                } else
+                }
+                else
                 {
                     colliding = false;
                 }
-                
+
 
             }
-            coyoteFrames = 5;
-            if (coyoteFrames > 6) { coyoteFrames--; }
+            
+            coyoteFrames--;
         }
         private void DrawLine(SpriteBatch spriteBatch, Texture2D texture, Vector2 start, Vector2 end)
         {
@@ -185,7 +222,7 @@ namespace graphook
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            
+
             Texture2D whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
 
