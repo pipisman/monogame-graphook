@@ -30,6 +30,8 @@ namespace graphook
         public Vector2 prp;
         private Vector2 vel2;
         int subpx;
+        KeyboardState previousState;
+        KeyboardState currentState;
         bool unTouchable;
         public ParticleSystem particleSystem;
         int subpy;
@@ -58,11 +60,11 @@ namespace graphook
             dcl.isActivated = isActivated;
         }
 
-        private void Move(float i, float triRad, Vector2 center)
+        private void Move(float q, float triRad, Vector2 center)
         {
             positions = [];
 
-            float angle = i;
+            float angle = q;
             for (int k = 0; k < triRad / 5; k++)
             {
                 double ghX1 = k * 5 * Math.Cos(angle * pi / 180);
@@ -74,8 +76,48 @@ namespace graphook
             double x1 = triRad * Math.Cos(angle * pi / 180);
 
             double y1 = triRad * Math.Sin(angle * pi / 180);
+            float xr = center.X + (float)x1;
+            float yr = center.Y + (float)y1;
+            Vector2 _a = new Vector2(xr, yr + 16);
+            Vector2 _b = new Vector2(xr + 16, yr + 16);
+            Vector2 _c = new Vector2(xr, yr);
+            Vector2 _d = new Vector2(xr + 16, yr);
+            for (int i = 0; i < collisions.Count; i++)
+            {
+                if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
+                    && _a.Y > collisions[i]._c.Y && _a.Y < collisions[i]._a.Y
+                    && _b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
+                    && _b.Y > collisions[i]._c.Y && _b.Y < collisions[i]._a.Y)
+                {
+                    isActivated = false;
+                    return;
+                }
+                else if (_b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
+                    && _b.Y > collisions[i]._c.Y && _b.Y < collisions[i]._a.Y)
+                {
+                    isActivated = false;
+                    return;
+                }
+                else if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
+                    && _a.Y > collisions[i]._c.Y && _a.Y < collisions[i]._a.Y)
+                {
+                    isActivated = false;
+                    return;
+                }
+                else if (_d.X > collisions[i]._c.X && _d.X < collisions[i]._d.X
+                    && _d.Y > collisions[i]._c.Y && _d.Y < collisions[i]._a.Y)
+                {
+                    isActivated = false;
+                    return;
+                }
+                else if (_c.X > collisions[i]._c.X && _c.X < collisions[i]._d.X
+                    && _c.Y > collisions[i]._c.Y && _c.Y < collisions[i]._a.Y)
+                {
+                    isActivated = false;
+                    return;
+                }
+            }
 
-            
 
             prp = dcl.Position;
             dcl.Position = new Vector2(center.X + (float)x1, center.Y + (float)y1);
@@ -85,7 +127,8 @@ namespace graphook
 
             Debug.WriteLine(dcl.Position.X);
             Debug.WriteLine(dcl.Position.Y);
-            KeyboardState newState = Keyboard.GetState();
+            previousState = currentState;
+            currentState = Keyboard.GetState();
             if (vel.X > 0) { vel.X -= 1; }
             if (vel.X < 0) { vel.X += 1; }
             if (vel2.Y > 0) { vel2.Y -= 0.4f; }
@@ -100,7 +143,7 @@ namespace graphook
             
             if (vel.Y < -3) {
                 subpy = 0;
-                if (newState.IsKeyDown(Keys.Space))
+                if (currentState.IsKeyDown(Keys.Space))
                 {
 
                     vel2.Y = 0;
@@ -128,18 +171,18 @@ namespace graphook
             }
 
              
-            if (!(newState.IsKeyDown(Keys.A) && newState.IsKeyDown(Keys.D)) && !(cframes - 5 > 0))
+            if (!(currentState.IsKeyDown(Keys.A) && currentState.IsKeyDown(Keys.D)) && !(cframes - 5 > 0))
             {
-                if (newState.IsKeyDown(Keys.D))
+                if (currentState.IsKeyDown(Keys.D))
                 {
                     vel.X = 20;
                 }
-                if (newState.IsKeyDown(Keys.A))
+                if (currentState.IsKeyDown(Keys.A))
                 {
                     vel.X = -20;
                 }
             }
-            if (newState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0)
+            if (currentState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0)
             {
                 vel.Y = -54;
                 dcl.coyoteFrames = 0;
@@ -190,7 +233,7 @@ namespace graphook
                     isActivated = false;
                     return;
                 }
-                if (newState.IsKeyDown(Keys.Space))
+                if (currentState.IsKeyDown(Keys.Space) && previousState.IsKeyUp(Keys.Space))
                 {
                     if (dcl.colliding)
                     {
