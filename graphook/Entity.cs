@@ -75,66 +75,7 @@ namespace graphook
 
             double y1 = triRad * Math.Sin(angle * pi / 180);
 
-            if (x1 < 0)
-            {
-                float ac = i + 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
-                double x2 = triRad * Math.Cos(ac * pi / 180);
-
-                double y2 = triRad * Math.Sin(ac * pi / 180);
-                for (int y = 0; y < collisions.Count; y++) {
-                    if (x2 > collisions[y]._c.X && x2 < collisions[y]._d.X
-                    && y2 > collisions[y]._c.Y && y2 < collisions[y]._a.Y)
-                    {
-                        dcl.Position = prp;
-                        isActivated = false;
-                        return;
-                    }
-                }
-                ac += 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
-                x2 = triRad * Math.Cos(ac * pi / 180);
-
-                y2 = triRad * Math.Sin(ac * pi / 180);
-                for (int y = 0; y < collisions.Count; y++)
-                {
-                    if (x2 > collisions[y]._c.X && x2 < collisions[y]._d.X
-                    && y2 > collisions[y]._c.Y && y2 < collisions[y]._a.Y)
-                    {
-                        dcl.Position = prp;
-                        isActivated = false;
-                        return;
-                    }
-                }
-            } else if (x1 > 0)
-            {
-                float ac = i + 4f + (5 - ab / 30);
-                double x2 = triRad * Math.Cos(ac * pi / 180);
-
-                double y2 = triRad * Math.Sin(ac * pi / 180);
-                for (int y = 0; y < collisions.Count; y++)
-                {
-                    if (x2 > collisions[y]._c.X && x2 < collisions[y]._d.X
-                    && y2 > collisions[y]._c.Y && y2 < collisions[y]._a.Y)
-                    {
-                        dcl.Position = prp;
-                        isActivated = false;
-                        return;
-                    }
-                }
-                ac += 4f + (5 - ab / 30);
-                x2 = triRad * Math.Cos(ac * pi / 180);
-
-                x2 = triRad * Math.Sin(ac * pi / 180);
-                for (int y = 0; y < collisions.Count; y++)
-                {
-                    if (x2 > collisions[y]._c.X && x2 < collisions[y]._d.X
-                    && y2 > collisions[y]._c.Y && y2 < collisions[y]._a.Y)
-                    {
-                        dcl.Position = prp;
-                        isActivated = false;
-                        return;
-                    }
-                }
-            }
+            
 
             prp = dcl.Position;
             dcl.Position = new Vector2(center.X + (float)x1, center.Y + (float)y1);
@@ -279,17 +220,25 @@ namespace graphook
 
                 if (x1 < 0)
                 {
-                    
 
 
+                    if (dcl.colliding)
+                    {
+                        isActivated = false;
+                        return;
+                    }
                     b -= 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
 
 
                     if ((b < i - (180 - ab / 60) )|| dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
                         previousMouseState.RightButton == ButtonState.Released)
                     {
-                        
-                        
+
+                        if (dcl.colliding)
+                        {
+                            isActivated = false;
+                            return;
+                        }
                         float angle = b;
 
                         double x1 = ab * Math.Cos(angle * pi / 180);
@@ -309,16 +258,24 @@ namespace graphook
                     
                     b += 4f + (5 - ab / 30);
                     //if (b > i + 70)
+                    if (dcl.colliding)
+                    {
+                        isActivated = false;
+                        return;
+                    }
 
-                    
-                    
+
 
                     if ((b > i + (180 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
                 previousMouseState.RightButton == ButtonState.Released)
                     {
                         
                         {
-                            
+                            if (dcl.colliding)
+                            {
+                                isActivated = false;
+                                return;
+                            }
                             float angle = b;
 
                             double x1 = ab * Math.Cos(angle * pi / 180);
