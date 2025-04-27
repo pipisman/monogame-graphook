@@ -18,6 +18,7 @@ namespace graphook
         int dd;
         public waterController(int springAmount, int springOffset, Texture2D texture)
         {
+            
             this.amount = springAmount;
             this.whiteTexture = texture;
             water = new List<Spring>();

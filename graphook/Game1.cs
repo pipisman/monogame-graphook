@@ -43,6 +43,18 @@ namespace graphook
         int mousey;
         float hue;
         Effect saturationEffect;
+        Random rand = new Random();
+        int agentX;  // Random X position of agent
+        int agentY;  // Random Y position of agent
+        int targetX;                // Target X position
+        int targetY;                // Target Y position
+        double lastReward;
+
+        int bestDirectionX = 1;           // Initially assume right is good on X-axis
+        int bestDirectionY = 1;           // Initially assume up is good on Y-axis
+        double epsilon = 1.0;
+        double epsilonDecay = 0.98;
+        double minEpsilon = 0.05;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -74,8 +86,17 @@ namespace graphook
             textures.Add(fireTexture);
             textures2.Add(Content.Load<Texture2D>("amogus2"));
             particleSystem = new ParticleSystem_sin(textures, new Vector2(400, 240));
+
+
+            //test
+
             
-            Debug.WriteLine("Current directory: " + Directory.GetCurrentDirectory());
+
+            
+
+
+
+
             string json = File.ReadAllText("collisions.json");
             cls = JsonSerializer.Deserialize<List<clsData>>(json);
             foreach (var cl in cls)
@@ -92,23 +113,36 @@ namespace graphook
             
             player = new Entity(collisions, textures2, spriteBatch);
             player.dcl.player = player;
+            targetX = (int)player.dcl.Position.X;  // Random X position of agent
+            targetY = (int)player.dcl.Position.Y;
         }
-
+        
         protected override void UnloadContent()
         {
+        }
+        private new void Exit()
+        {
+            // This method is called before the game is completely terminated.
+            player.SaveTrainingData();
+            base.Exit();
         }
 
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                Exit();  // This will trigger the game exit sequence
+            }
             KeyboardState newState = Keyboard.GetState();
 
 
 
-
-
+            if (newState.IsKeyDown(Keys.R))
+            {
+                player.dcl.Position = new Vector2(90, 85);
+            }
+                    
             water.Update(gameTime, newState, random);
             cloudXoffset += 0.3f;
             

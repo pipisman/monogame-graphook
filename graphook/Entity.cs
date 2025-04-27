@@ -8,15 +8,28 @@ using Microsoft.Xna.Framework.Input;
 using System.Diagnostics;
 using System.Reflection.Metadata;
 using System.ComponentModel.Design;
-
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 namespace graphook
 {
+    public class TrainingData
+    {
+        public float PlayerX;
+        public float PlayerVelocityX;
+        public bool IsGrounded;
+        public float EnemyDistance;
+        public string Action; // Action taken (moveLeft, moveRight, jump, etc.)
+    }
     internal class Entity
     {
         public bool playable;
         
         private float i;
         public int id;
+        float fallingSpeed = 5;
         double pi = 3.1415926535;
         int cframes;
         public SpriteBatch spriteBatch;
@@ -30,14 +43,29 @@ namespace graphook
         public Vector2 prp;
         private Vector2 vel2;
         int subpx;
+        Vector2 wallCheck1;
+        Vector2 wallCheck2;
         KeyboardState previousState;
         KeyboardState currentState;
         bool unTouchable;
         public ParticleSystem particleSystem;
-        int subpy;
+
+
+        private List<TrainingData> trainingData = new List<TrainingData>();
+
+        private Vector2 playerPosition;
+        private Vector2 playerVelocity;
+        private bool isGrounded;
+        private float enemyDistance;
+
+
+
+        float subpy;
         int particleFrames = 0;
         public bool isActivated;
         raycast ray;
+        int _width;
+        int _height;
         float ab;
         public Texture2D texture;
         public Texture2D whiteTexture;
@@ -49,7 +77,9 @@ namespace graphook
         float y1;
         public Entity(List<Collision> Collisions, List<Texture2D> textures, SpriteBatch spriteBatch)
         {
-            dcl = new DCollision(new Vector2(90, 85), new Vector2(90, 85), 16, 16, Collisions);
+            _width = 13;
+            _height = 19;
+            dcl = new DCollision(new Vector2(90, 85), new Vector2(90, 85), _width, _height, Collisions);
             particleSystem = new ParticleSystem(textures, new Vector2(400, 240), 1);
             
             this.collisions = Collisions;
@@ -59,7 +89,26 @@ namespace graphook
             random = new Random();
             dcl.isActivated = isActivated;
         }
-
+        private void RecordData()
+        {
+            // Example state of the game
+            string action = GetCurrentAction();
+            trainingData.Add(new TrainingData
+            {
+                PlayerX = dcl.Position.X,
+                PlayerVelocityX = vel.X,
+                IsGrounded = (cframes > 0),
+                Action = action
+            });
+        }
+        private string GetCurrentAction()
+        {
+            // Use input to determine the player's action
+            if (Keyboard.GetState().IsKeyDown(Keys.A)) return "MoveLeft";
+            if (Keyboard.GetState().IsKeyDown(Keys.D)) return "MoveRight";
+            if (Keyboard.GetState().IsKeyDown(Keys.Space)) return "Jump";
+            return "Idle";
+        }
         private void Move(float q, float triRad, Vector2 center)
         {
             positions = [];
@@ -78,10 +127,10 @@ namespace graphook
             double y1 = triRad * Math.Sin(angle * pi / 180);
             float xr = center.X + (float)x1;
             float yr = center.Y + (float)y1;
-            Vector2 _a = new Vector2(xr, yr + 16);
-            Vector2 _b = new Vector2(xr + 16, yr + 16);
+            Vector2 _a = new Vector2(xr, yr + _height);
+            Vector2 _b = new Vector2(xr + _width, yr + _height);
             Vector2 _c = new Vector2(xr, yr);
-            Vector2 _d = new Vector2(xr + 16, yr);
+            Vector2 _d = new Vector2(xr + _width, yr);
             for (int i = 0; i < collisions.Count; i++)
             {
                 if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
@@ -122,32 +171,57 @@ namespace graphook
             prp = dcl.Position;
             dcl.Position = new Vector2(center.X + (float)x1, center.Y + (float)y1);
         }
+        public void SaveTrainingData()
+        {
+            string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(trainingData);
+            File.WriteAllText("playerData.json", jsonData);
+        }
+
         public void Update()
         {
 
-            Debug.WriteLine(dcl.Position.X);
-            Debug.WriteLine(dcl.Position.Y);
+            RecordData();
+            
             previousState = currentState;
             currentState = Keyboard.GetState();
             if (vel.X > 0) { vel.X -= 1; }
             if (vel.X < 0) { vel.X += 1; }
-            if (vel2.Y > 0) { vel2.Y -= 0.4f; }
-            if (vel2.Y < 0) { vel2.Y += 0.4f; }
-            if (vel2.X > 0) { vel2.X -= 0.4f; }
-            if (vel2.X < 0) { vel2.X += 0.4f; }
+            if (vel2.Y > 0) { vel2.Y -= 0.2f; }
+            if (vel2.Y < 0) { vel2.Y += 0.2f; }
+            if (vel2.X > 0) { vel2.X -= 0.125f; }
+            if (vel2.X < 0) { vel2.X += 0.125f; }
             if (vel2.X < 1 && vel2.X > -1) { vel2.X = 0; }
             if (vel2.Y < 1 && vel2.Y > -1) { vel2.Y = 0; }
 
+
+
+            fallingSpeed = 30;
+            wallCheck1 = new Vector2(dcl.Position.X - 2, dcl.Position.Y + (int)(_height / 2));
+            for (int i = 0; i < collisions.Count; i++)
+            {
+                if (wallCheck1.X > collisions[i]._c.X && wallCheck1.X < collisions[i]._d.X
+                    && wallCheck1.Y > collisions[i]._c.Y && wallCheck1.Y < collisions[i]._a.Y)
+                {
+                    fallingSpeed = 15;
+                    break;
+                }
+            }
             
-                
-            
+
+
+
+
+
+
+
+
             if (vel.Y < -3) {
                 subpy = 0;
                 if (currentState.IsKeyDown(Keys.Space))
                 {
 
                     vel2.Y = 0;
-
+                    
                     
                     vel.Y += 3;
                     
@@ -162,7 +236,7 @@ namespace graphook
             else {
                 if (!(cframes > 0))
                 {
-                    subpy = 20;
+                    subpy = fallingSpeed;
                 }
             }
             if(cframes > 0)
@@ -224,7 +298,6 @@ namespace graphook
                     center = ray.Collidepoint().pos;
                     b = i;
                     
-                    Debug.WriteLine(i);
                 }
             }
             if (isActivated) {
@@ -249,8 +322,8 @@ namespace graphook
 
 
 
-                    vel2 = new Vector2(ab * (float)pi * 2 / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                        center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 2 / 90 * (float)Math.Sin(
+                    vel2 = new Vector2(ab * (float)pi * 3 / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                        center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 3 / 90 * (float)Math.Sin(
                             (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                                 center.X + (float)x1 - dcl.Position.X)));
 
@@ -273,7 +346,7 @@ namespace graphook
                     b -= 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
 
 
-                    if ((b < i - (180 - ab / 60) )|| dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
+                    if ((b < i - (1000 - ab / 60) )|| dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
                         previousMouseState.RightButton == ButtonState.Released)
                     {
 
@@ -290,16 +363,16 @@ namespace graphook
 
 
                         
-                        vel2 = new Vector2(ab * (float)pi * 4f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                            center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 4f / 90 * (float)Math.Sin(
+                        vel2 = new Vector2(ab * (float)pi * 3f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                            center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 3f / 90 * (float)Math.Sin(
                                 (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                                     center.X + (float)x1 - dcl.Position.X)));
                         isActivated = false;
 
                     }
                 } else if (x1 > 0) {
-                    
-                    b += 4f + (5 - ab / 30);
+
+                    b += 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
                     //if (b > i + 70)
                     if (dcl.colliding)
                     {
@@ -309,7 +382,7 @@ namespace graphook
 
 
 
-                    if ((b > i + (180 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
+                    if ((b > i + (1000 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
                 previousMouseState.RightButton == ButtonState.Released)
                     {
                         
@@ -342,7 +415,7 @@ namespace graphook
             subpx /= 4;
             dcl.PreviousPosition = dcl.Position;
             prp = dcl.Position;
-            dcl.Position = new Vector2((int)vel.X / 10 + vel2.X + dcl.Position.X + subpx, (int)vel.Y / 10 + vel2.Y + dcl.Position.Y + subpy / 10);
+            dcl.Position = new Vector2(vel.X / 10f + vel2.X + dcl.Position.X + subpx, vel.Y / 10f + vel2.Y + dcl.Position.Y + subpy / 10f);
 
 
             dcl.isActivated = isActivated;
