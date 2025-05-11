@@ -1,5 +1,6 @@
 ﻿using graphook;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ internal class Spring
     private float damping;
     private Vector2 startPos;
     private float externalForce;
+    float hue;
     public static Texture2D PixelTexture;
     public List<Spring> water;
     private int numList;
@@ -36,7 +38,7 @@ internal class Spring
         this.water = water;
         this.numList = numlist;
         this.whiteTexture = whiteTexture;
-        
+        hue = numList / 10;
 
     }
 
@@ -107,7 +109,9 @@ internal class Spring
 
         Velocity += acceleration * deltaTime;
         Position += Velocity * deltaTime;
-
+        hue += (float)deltaTime * 200f;
+            
+            if (hue >= 360f) hue -= 360f;
         externalForce = 0f; 
     }
 
@@ -119,6 +123,26 @@ internal class Spring
                          new Vector2(0f, (float)texture.Height / 2),
                          new Vector2(Vector2.Distance(start, end), 1f),
                          SpriteEffects.None, 0f);
+    }
+    private Color ColorFromHSV(float hue, float saturation, float value)
+    {
+        int hi = (int)(hue / 60) % 6;
+        float f = hue / 60 - (int)(hue / 60);
+
+        float v = value * 255;
+        float p = v * (1 - saturation);
+        float q = v * (1 - f * saturation);
+        float t = v * (1 - (1 - f) * saturation);
+
+        return hi switch
+        {
+            0 => new Color(v / 255f, t / 255f, p / 255f),
+            1 => new Color(q / 255f, v / 255f, p / 255f),
+            2 => new Color(p / 255f, v / 255f, t / 255f),
+            3 => new Color(p / 255f, q / 255f, v / 255f),
+            4 => new Color(t / 255f, p / 255f, v / 255f),
+            _ => new Color(v / 255f, p / 255f, q / 255f),
+        };
     }
     public void Draw(SpriteBatch spriteBatch)
     {
@@ -146,7 +170,7 @@ internal class Spring
 
         float minY = 100f;
         float maxY = 300f;
-        float depthFactor = MathHelper.Clamp((Position - 250 + 10) / (maxY - minY), 0f, 1f);
+        float depthFactor = MathHelper.Clamp((Position - 250 + 20) / (maxY - minY), 0f, 1f);
         
         Color waterColor2 = new Color(
             50,
@@ -154,6 +178,15 @@ internal class Spring
             (int)(200 * (1 - 0.15f * depthFactor)),
             170
         );
+        
+        //le funny
+        Color rainbowColor = ColorFromHSV(hue, 1f, 1f);
+        //Color waterColor2 = new Color(
+        //    rainbowColor.R,
+        //    (int)(rainbowColor.G * (1 - depthFactor)),
+        //    (int)(rainbowColor.B * (1 - 0.15f * depthFactor)),
+        //   170
+        //);
         Color waterColor = new Color(
             50,
             (int)(255 * (1 - depthFactor)),

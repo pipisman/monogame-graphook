@@ -24,6 +24,7 @@ namespace graphook
         int dd;
         Effect bloomCombineEffect;
         public static Texture2D PixelTexture;
+        fireSystem fire;
         private Random random;
         Texture2D crosshair;
         Effect fireShader;
@@ -37,6 +38,7 @@ namespace graphook
         float cloudXoffset = 0;
         Collision collision1;
         Entity player;
+        Texture2D torch;
         List<clsData> cls;
         List<Collision> collisions = new List<Collision>();
         int mousex;
@@ -70,11 +72,12 @@ namespace graphook
             crosshairTarget = new RenderTarget2D(GraphicsDevice, crosshair.Width, crosshair.Height);
             List<Texture2D> textures = new List<Texture2D>();
             List<Texture2D> textures2 = new List<Texture2D>();
-            fireTexture = Content.Load<Texture2D>("cloud");
+            fireTexture = Content.Load<Texture2D>("fire1");
+            torch = Content.Load<Texture2D>("torch2");
             textures.Add(fireTexture);
             textures2.Add(Content.Load<Texture2D>("amogus2"));
             particleSystem = new ParticleSystem_sin(textures, new Vector2(400, 240));
-            
+            fire = new fireSystem(textures, new Vector2(400, 240));
             Debug.WriteLine("Current directory: " + Directory.GetCurrentDirectory());
             string json = File.ReadAllText("collisions.json");
             cls = JsonSerializer.Deserialize<List<clsData>>(json);
@@ -83,7 +86,7 @@ namespace graphook
                 collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height));
             }
             
-            
+             
             water = new waterController(330, 3, whiteTexture);
             int springAmount = 70;
             random = new Random();
@@ -111,8 +114,8 @@ namespace graphook
 
             water.Update(gameTime, newState, random);
             cloudXoffset += 0.3f;
-            
-            
+            fire.Update(0);
+
             hue += (float)gameTime.ElapsedGameTime.TotalSeconds * 200f;
             
             if (hue >= 360f) hue -= 360f;
@@ -159,18 +162,23 @@ namespace graphook
             
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(new Color(68, 179, 248, 255));
+
+            fire.Draw(spriteBatch);
             
             particleSystem.EmitterLocation = new Vector2(cloudXoffset, 75);
-            particleSystem.Update(0);
+            //particleSystem.Update(0);
+            /*
             particleSystem.Draw(spriteBatch);
             particleSystem.EmitterLocation = new Vector2(cloudXoffset + 300, 200);
             particleSystem.Update(0);
             particleSystem.Draw(spriteBatch);
-
+            */
 
 
 
             spriteBatch.Begin();
+            spriteBatch.Draw(torch, new Rectangle((int)fire.EmitterLocation.X - 16, (int)fire.EmitterLocation.Y - 18, torch.Width, torch.Height 
+                ), new Color(255, 255, 255 ));
             
             for (int i = 0; i < player.positions.Count(); i++)
             {

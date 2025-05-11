@@ -32,9 +32,10 @@ namespace graphook
         int subpx;
         KeyboardState previousState;
         KeyboardState currentState;
+        bool wjf = false;
         bool unTouchable;
         public ParticleSystem particleSystem;
-        int subpy;
+        float subpy;
         int particleFrames = 0;
         public bool isActivated;
         raycast ray;
@@ -45,6 +46,7 @@ namespace graphook
         int av;
         private Random random;
         float b;
+        float cooldown;
         float x1;
         float y1;
         public Entity(List<Collision> Collisions, List<Texture2D> textures, SpriteBatch spriteBatch)
@@ -125,8 +127,6 @@ namespace graphook
         public void Update()
         {
 
-            Debug.WriteLine(dcl.Position.X);
-            Debug.WriteLine(dcl.Position.Y);
             previousState = currentState;
             currentState = Keyboard.GetState();
             if (vel.X > 0) { vel.X -= 1; }
@@ -138,12 +138,18 @@ namespace graphook
             if (vel2.X < 1 && vel2.X > -1) { vel2.X = 0; }
             if (vel2.Y < 1 && vel2.Y > -1) { vel2.Y = 0; }
 
-            
+            wjf = false;
                 
-            
+            if (dcl.istouchingwall && cooldown <= 0 && !previousState.IsKeyDown(Keys.Space) && currentState.IsKeyDown(Keys.Space))
+            {
+                wjf = true;
+                cooldown = 10;
+            }
+            cooldown--;
+
             if (vel.Y < -3) {
                 subpy = 0;
-                if (currentState.IsKeyDown(Keys.Space))
+                if (currentState.IsKeyDown(Keys.Space) && previousState.IsKeyDown(Keys.Space))
                 {
 
                     vel2.Y = 0;
@@ -162,7 +168,10 @@ namespace graphook
             else {
                 if (!(cframes > 0))
                 {
-                    subpy = 20;
+                    if (((currentState.IsKeyDown(Keys.A) && previousState.IsKeyDown(Keys.A)) || (currentState.IsKeyDown(Keys.D) && previousState.IsKeyDown(Keys.D))))
+                        subpy = dcl.fallingSpeed;
+                    else
+                        subpy = 20;
                 }
             }
             if(cframes > 0)
@@ -182,11 +191,12 @@ namespace graphook
                     vel.X = -20;
                 }
             }
-            if (currentState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0)
+            Debug.WriteLine(dcl.coyoteFrames);
+            if (currentState.IsKeyDown(Keys.Space) && !previousState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0 || wjf)
             {
                 vel.Y = -54;
                 dcl.coyoteFrames = 0;
-
+                wjf = false;
                 particleFrames = 6;
                 
             }
@@ -224,7 +234,7 @@ namespace graphook
                     center = ray.Collidepoint().pos;
                     b = i;
                     
-                    Debug.WriteLine(i);
+                    
                 }
             }
             if (isActivated) {
@@ -342,7 +352,7 @@ namespace graphook
             subpx /= 4;
             dcl.PreviousPosition = dcl.Position;
             prp = dcl.Position;
-            dcl.Position = new Vector2((int)vel.X / 10 + vel2.X + dcl.Position.X + subpx, (int)vel.Y / 10 + vel2.Y + dcl.Position.Y + subpy / 10);
+            dcl.Position = new Vector2(vel.X / 10 + vel2.X + dcl.Position.X + subpx, vel.Y / 10 + vel2.Y + dcl.Position.Y + subpy / 10);
 
 
             dcl.isActivated = isActivated;
