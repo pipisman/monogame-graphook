@@ -129,8 +129,10 @@ namespace graphook
 
             previousState = currentState;
             currentState = Keyboard.GetState();
-            if (vel.X > 0) { vel.X -= 1; }
-            if (vel.X < 0) { vel.X += 1; }
+            if (vel.X > 0) { vel.X -= 2; }
+            if (vel.X > 0 && vel.X < 2) { vel.X = 0; }
+            if (vel.X < 0) { vel.X += 2; }
+            if (vel.X < 0 && vel.X > -2) { vel.X = 0; }
             if (vel2.Y > 0) { vel2.Y -= 0.4f; }
             if (vel2.Y < 0) { vel2.Y += 0.4f; }
             if (vel2.X > 0) { vel2.X -= 0.4f; }
@@ -283,7 +285,9 @@ namespace graphook
                     b -= 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
 
 
-                    if ((b < i - (180 - ab / 60) )|| dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
+                    //if ((b < i - (600 - ab / 60) )|| dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
+                        //previousMouseState.RightButton == ButtonState.Released)
+                    if (dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
                         previousMouseState.RightButton == ButtonState.Released)
                     {
 
@@ -319,10 +323,12 @@ namespace graphook
 
 
 
-                    if ((b > i + (180 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
-                previousMouseState.RightButton == ButtonState.Released)
+                    //    if ((b > i + (600 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
+                    //previousMouseState.RightButton == ButtonState.Released)
+                    if (dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
+                        previousMouseState.RightButton == ButtonState.Released)
                     {
-                        
+
                         {
                             if (dcl.colliding)
                             {

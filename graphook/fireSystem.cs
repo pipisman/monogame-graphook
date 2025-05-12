@@ -56,7 +56,7 @@ namespace graphook
             {
                 Texture2D texture = textures[random.Next(textures.Count)];
                 Vector2 position = new Vector2(EmitterLocation.X + random.Next(0, 17) - 8, EmitterLocation.Y);
-                Vector2 velocity = new Vector2((float)random.NextDouble() * 1.5f - 0.75f, -(float)random.NextDouble() - 2);
+                Vector2 velocity = new Vector2((float)random.NextDouble() * 1f - 0.75f, -(float)random.NextDouble() - 1);
 
                 float angle = 0;
                 float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
@@ -69,7 +69,7 @@ namespace graphook
             else if (type == 1) {
                 Texture2D texture = textures[random.Next(textures.Count)];
                 Vector2 position = new Vector2(EmitterLocation.X + random.Next(0, 17) - 8, EmitterLocation.Y);
-                Vector2 velocity = new Vector2((float)random.NextDouble() * 1.5f - 0.75f, -(float)random.NextDouble() - 2);
+                Vector2 velocity = new Vector2((float)random.NextDouble() * 1.5f - 0.75f, -(float)random.NextDouble() - 1);
 
                 float angle = 0;
                 float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
