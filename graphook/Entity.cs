@@ -270,8 +270,8 @@ namespace graphook
                     return;
                 }
                 Move(b, ab, center);
-                 
-                
+
+
 
                 if (x1 < 0)
                 {
@@ -285,9 +285,7 @@ namespace graphook
                     b -= 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
 
 
-                    //if ((b < i - (600 - ab / 60) )|| dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
-                        //previousMouseState.RightButton == ButtonState.Released)
-                    if (dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
+                    if ((b < i - (1000 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
                         previousMouseState.RightButton == ButtonState.Released)
                     {
 
@@ -303,17 +301,19 @@ namespace graphook
                         double y1 = ab * Math.Sin(angle * pi / 180);
 
 
-                        
-                        vel2 = new Vector2(ab * (float)pi * 4f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                            center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 4f / 90 * (float)Math.Sin(
+
+                        vel2 = new Vector2(ab * (float)pi * 3f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                            center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 3f / 90 * (float)Math.Sin(
                                 (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                                     center.X + (float)x1 - dcl.Position.X)));
                         isActivated = false;
 
                     }
-                } else if (x1 > 0) {
-                    
-                    b += 4f + (5 - ab / 30);
+                }
+                else if (x1 > 0)
+                {
+
+                    b += 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
                     //if (b > i + 70)
                     if (dcl.colliding)
                     {
@@ -323,10 +323,8 @@ namespace graphook
 
 
 
-                    //    if ((b > i + (600 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
-                    //previousMouseState.RightButton == ButtonState.Released)
-                    if (dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
-                        previousMouseState.RightButton == ButtonState.Released)
+                    if ((b > i + (1000 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
+                previousMouseState.RightButton == ButtonState.Released)
                     {
 
                         {
@@ -349,11 +347,13 @@ namespace graphook
                                         center.X + (float)x1 - dcl.Position.X)));
                             isActivated = false;
                         }
-                        
+
                     }
                 }
-                
+
             }
+
+        
             
             subpx /= 4;
             dcl.PreviousPosition = dcl.Position;
