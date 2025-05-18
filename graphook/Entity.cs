@@ -51,7 +51,7 @@ namespace graphook
         float y1;
         public Entity(List<Collision> Collisions, List<Texture2D> textures, SpriteBatch spriteBatch)
         {
-            dcl = new DCollision(new Vector2(90, 85), new Vector2(90, 85), 16, 16, Collisions);
+            dcl = new DCollision(new Vector2(90, 85), new Vector2(90, 85), 13, 18, Collisions);
             particleSystem = new ParticleSystem(textures, new Vector2(400, 240), 1);
             
             this.collisions = Collisions;
@@ -133,10 +133,10 @@ namespace graphook
             if (vel.X > 0 && vel.X < 2) { vel.X = 0; }
             if (vel.X < 0) { vel.X += 2; }
             if (vel.X < 0 && vel.X > -2) { vel.X = 0; }
-            if (vel2.Y > 0) { vel2.Y -= 0.4f; }
-            if (vel2.Y < 0) { vel2.Y += 0.4f; }
-            if (vel2.X > 0) { vel2.X -= 0.4f; }
-            if (vel2.X < 0) { vel2.X += 0.4f; }
+            if (vel2.Y > 0) { vel2.Y -= 0.2f; }
+            if (vel2.Y < 0) { vel2.Y += 0.2f; }
+            if (vel2.X > 0) { vel2.X -= 0.125f; }
+            if (vel2.X < 0) { vel2.X += 0.125f; }
             if (vel2.X < 1 && vel2.X > -1) { vel2.X = 0; }
             if (vel2.Y < 1 && vel2.Y > -1) { vel2.Y = 0; }
 
@@ -215,7 +215,7 @@ namespace graphook
             if (currentMouseState.LeftButton == ButtonState.Pressed &&
                 previousMouseState.LeftButton == ButtonState.Released)
             {
-                ray = new raycast(collisions, 125, 10, dcl.Position, new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
+                ray = new raycast(collisions, 125, 5, dcl.Position, new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
                 if (ray.Collidepoint().collided)
                 {
 
