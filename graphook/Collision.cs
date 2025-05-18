@@ -16,7 +16,7 @@ namespace graphook
         public Vector2 Position { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-
+        public Vector2 _Pposition;
 
         //4 points
         public Vector2 _a;
@@ -24,14 +24,15 @@ namespace graphook
         public Vector2 _c;
         public Vector2 _d;
 
-        public Collision(Vector2 position, int width, int height)
+        public Collision(Vector2 position, int width, int height, Vector2 playerPos)
         {
+            _Pposition = position;
             Position = position;
             Width = width;
             Height = height;
-            _a = new Vector2(position.X, position.Y + height);
+            _a = new Vector2(position.X + 5, position.Y + height);
             _b = new Vector2(position.X + width, position.Y + height);
-            _c = new Vector2(position.X, position.Y);
+            _c = new Vector2(position.X + 5, position.Y);
             _d = new Vector2(position.X + width, position.Y);
 
         }

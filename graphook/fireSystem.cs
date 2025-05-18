@@ -7,44 +7,37 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace graphook
 {
-    public class ParticleSystem_sin
+    public class fireSystem
     {
         private Random random;
         public Vector2 EmitterLocation { get; set; }
-        private List<Particle_sin> particles;
+        private List<fireParticle> particles;
         private List<Texture2D> textures;
         double pi = 3.1415926535;
         Effect saturationEffect;
         double i, angle, x1, y1;
 
-        public ParticleSystem_sin(List<Texture2D> textures, Vector2 location)
+        public fireSystem(List<Texture2D> textures, Vector2 location)
         {
             EmitterLocation = location;
             this.textures = textures;
-            this.particles = new List<Particle_sin>();
+            this.particles = new List<fireParticle>();
             random = new Random();
         }
 
         public void Update(int type)
         {
-            int radius;
-            
-            for (i = 0; i < 360; i += 6)
+
+            particles.Add(GenerateNewParticle(1));
+            particles.Add(GenerateNewParticle(1));
+            for (i = 0; i < 8; i += 1)
             {
-
-                angle = i;
-                radius = 20;
-                if (type == 1) radius = 50;
-                    
-                x1 = radius * Math.Cos(angle * pi / 180);
-
-                y1 = radius * Math.Sin(angle * pi / 180);
-                
-                particles.Add(GenerateNewParticle((float)x1, (float)y1, type));
+                particles.Add(GenerateNewParticle(type));
 
             }
+           
 
-            
+
 
             for (int particle = 0; particle < particles.Count; particle++)
             {
@@ -57,35 +50,35 @@ namespace graphook
             }
         }
 
-        private Particle_sin GenerateNewParticle(float x, float y, int type)
-        {
+        private fireParticle GenerateNewParticle(int type)
+        { 
             if (type == 0)
             {
                 Texture2D texture = textures[random.Next(textures.Count)];
-                Vector2 position = new Vector2(x + EmitterLocation.X, y + EmitterLocation.Y);
-                Vector2 velocity = new Vector2(random.Next(0, 2) == 0 ? -1 : 1, 0);
+                Vector2 position = new Vector2(EmitterLocation.X + random.Next(0, 17) - 8, EmitterLocation.Y);
+                Vector2 velocity = new Vector2((float)random.NextDouble() * 1f - 0.75f, -(float)random.NextDouble() - 1);
 
                 float angle = 0;
                 float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
                 Microsoft.Xna.Framework.Color color = new Microsoft.Xna.Framework.Color(255, 255, 255);
                 float size = (float)random.NextDouble();
-                int ttl = 40;
+                int ttl = random.Next(20,43);
 
-                return new Particle_sin(texture, position, velocity, angle, angularVelocity, color, size, ttl);
+                return new fireParticle(texture, position, velocity, angle, angularVelocity, color, size, ttl, type);
             }
             else if (type == 1) {
                 Texture2D texture = textures[random.Next(textures.Count)];
-                Vector2 position = new Vector2(x + EmitterLocation.X, y + EmitterLocation.Y);
-                float pAngle = (float)Math.Atan2(EmitterLocation.Y - position.Y, EmitterLocation.X - position.X);
-                Vector2 velocity = new Vector2((float)random.NextDouble() * 2 - 1 + 2 * (float)Math.Cos(pAngle), (float)random.NextDouble() * 2 - 1 + 2 * (float)Math.Sin(pAngle)); ;
-                
+                Vector2 position = new Vector2(EmitterLocation.X + random.Next(0, 17) - 8, EmitterLocation.Y);
+                Vector2 velocity = new Vector2((float)random.NextDouble() * 1.5f - 0.75f, -(float)random.NextDouble() - 1);
+
                 float angle = 0;
                 float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
-                Microsoft.Xna.Framework.Color color = new Microsoft.Xna.Framework.Color(255, 255, 255);
+                int uhhy = random.Next(100, 150);
+                Microsoft.Xna.Framework.Color color = new Microsoft.Xna.Framework.Color(uhhy, uhhy, uhhy);
                 float size = (float)random.NextDouble();
-                int ttl = 120;
+                int ttl = random.Next(30, 50);
 
-                return new Particle_sin(texture, position, velocity, angle, angularVelocity, color, size, ttl);
+                return new fireParticle(texture, position, velocity, angle, angularVelocity, color, size, ttl, type);
             }
             else
             {
