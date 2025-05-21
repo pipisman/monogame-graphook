@@ -48,10 +48,11 @@ namespace graphook
         float b;
         float cooldown;
         float x1;
+        
         float y1;
-        public Entity(List<Collision> Collisions, List<Texture2D> textures, SpriteBatch spriteBatch)
+        public Entity(List<Collision> Collisions, List<Texture2D> textures, SpriteBatch spriteBatch, List<triCol> triCollisions)
         {
-            dcl = new DCollision(new Vector2(90, 85), new Vector2(90, 85), 13, 18, Collisions);
+            dcl = new DCollision(new Vector2(90, 85), new Vector2(90, 85), 13, 18, Collisions, triCollisions);
             particleSystem = new ParticleSystem(textures, new Vector2(400, 240), 1);
             
             this.collisions = Collisions;
@@ -193,7 +194,6 @@ namespace graphook
                     vel.X = -20;
                 }
             }
-            Debug.WriteLine(dcl.coyoteFrames);
             if (currentState.IsKeyDown(Keys.Space) && !previousState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0 || wjf)
             {
                 vel.Y = -54;
@@ -261,7 +261,7 @@ namespace graphook
 
 
 
-                    vel2 = new Vector2(ab * (float)pi * 2 / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                    vel2 += new Vector2(ab * (float)pi * 2 / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                         center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 2 / 90 * (float)Math.Sin(
                             (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                                 center.X + (float)x1 - dcl.Position.X)));
@@ -302,7 +302,7 @@ namespace graphook
 
 
 
-                        vel2 = new Vector2(ab * (float)pi * 3f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                        vel2 += new Vector2(ab * (float)pi * 3f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                             center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 3f / 90 * (float)Math.Sin(
                                 (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                                     center.X + (float)x1 - dcl.Position.X)));
@@ -341,7 +341,7 @@ namespace graphook
 
 
 
-                            vel2 = new Vector2(ab * (float)pi * 4f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
+                            vel2 += new Vector2(ab * (float)pi * 4f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                                 center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 4f / 90 * (float)Math.Sin(
                                     (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
                                         center.X + (float)x1 - dcl.Position.X)));

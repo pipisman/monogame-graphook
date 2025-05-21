@@ -11,10 +11,13 @@ using System.Reflection.Metadata;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Input;
+using System.Security.Cryptography;
+using System.Threading;
 namespace graphook
 {
     internal class DCollision
     {
+        
         public int fallingSpeed = 20;
         public Vector2 Position { get; set; }
         public Vector2 PreviousPosition { get; set; }
@@ -22,6 +25,7 @@ namespace graphook
         public bool istouchingwall;
         public int Height { get; set; }
         public int coyoteFrames = 0;
+        private List<triCol> triangleCollisions;
         private List<Collision> collisions;
         public bool colliding = false;
         //4 points
@@ -31,10 +35,10 @@ namespace graphook
         public Vector2 _b;
         public Vector2 _c;
         public Vector2 _d;
-
-        public DCollision(Vector2 position, Vector2 previousPosition, int width, int height, List<Collision> Collisions)
+        private List<Vector2> dots;
+        public DCollision(Vector2 position, Vector2 previousPosition, int width, int height, List<Collision> Collisions, List<triCol> triangleCollisions)
         {
-            
+            this.triangleCollisions = triangleCollisions;
             PreviousPosition = previousPosition;
             Position = position;
             Width = width;
@@ -44,10 +48,12 @@ namespace graphook
             _c = new Vector2(position.X, position.Y);
             _d = new Vector2(position.X + width, position.Y);
             collisions = Collisions;
+            dots = new List<Vector2> { _a, _b, _c, _d };
 
         }
         public void Update()
         {
+            
             istouchingwall = false;
             isActivated = player.isActivated;
             fallingSpeed++;
@@ -56,7 +62,66 @@ namespace graphook
             _b = new Vector2(Position.X + Height, Position.Y + Height);
             _c = new Vector2(Position.X, Position.Y);
             _d = new Vector2(Position.X + Height, Position.Y);
+            dots = new List<Vector2> { _a, _b, _c, _d };
+            for (int i = 0; i < triangleCollisions.Count; i++)
+            {
 
+                //holy guacamole
+                Vector2[] dotsb = new[] { triangleCollisions[i].DotA, triangleCollisions[i].DotB, triangleCollisions[i].DotC };
+                for (int j = 0; j < dotsb.Length; j++)
+                {
+                    Vector2 dot = dotsb[j];
+                    if (dot.X > _c.X && dot.X < _d.X
+                    && dot.Y > _c.Y && dot.Y < _a.Y)
+                    {
+                        if (j == 1)
+                        {
+                            Position = new Vector2(Position.X, Position.Y - Math.Abs(dot.Y - _a.Y));
+                        }
+                    }
+                }
+
+                for (int c = 0; c < dots.Count; c++)
+                {
+                    Debug.WriteLine(dots[c].X + " and " + dots[c].Y);
+                    Debug.WriteLine(_b);
+                    float areaSum = area(triangleCollisions[i].DotA, triangleCollisions[i].DotB, dots[c])
+                      + area(triangleCollisions[i].DotB, triangleCollisions[i].DotC, dots[c])
+                      + area(triangleCollisions[i].DotA, triangleCollisions[i].DotC, dots[c]);
+
+                    float triangleArea = area(triangleCollisions[i].DotA, triangleCollisions[i].DotC, triangleCollisions[0].DotB);
+
+                    if (Math.Abs(areaSum - triangleArea) < 0.05f)
+                    {
+
+
+                        //if (Math.Abs(FindIntersection(_a, new Vector2(_b.X, _b.Y - 3f), triangleCollisions[0].DotA, triangleCollisions[0].DotB).X - _b.X) >
+                        //Math.Abs(FindIntersection(_b, _d, triangleCollisions[0].DotA, triangleCollisions[0].DotB).Y - _b.Y)) {
+                        if (dots[c] == _b)
+                        {
+                            Vector2 intersection = FindIntersection(_b, _d, triangleCollisions[i].DotA, triangleCollisions[i].DotB);
+                            if (intersection != Vector2.Zero)
+                            {
+                                Position = new Vector2(Position.X, Position.Y - Math.Abs(intersection.Y - _b.Y));
+                            }
+                            
+                        }
+                        if (dots[c] == _a)
+                        {
+                            Vector2 intersection = FindIntersection(_a, _c, triangleCollisions[i].DotC, triangleCollisions[i].DotB);
+                            if (intersection != Vector2.Zero)
+                            {
+                                Position = new Vector2(Position.X, Position.Y - Math.Abs(intersection.Y - _b.Y));
+                            }
+                            
+                        }
+
+                        //}
+                    }
+                }
+            }
+
+            //pravoygulnik
             for (int i = 0; i < collisions.Count; i++)
             {
                 if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
@@ -221,9 +286,41 @@ namespace graphook
 
 
             }
+
+            //triygylnici
+
+            float mousex = Mouse.GetState().X;
+            float mousey = Mouse.GetState().Y;
+            //float dotAtoPoint = (float)Math.Sqrt(Math.Abs(triangleCollisions[0].DotA.X - _b.X) * Math.Abs(triangleCollisions[0].DotA.X - _b.X) + Math.Abs(triangleCollisions[0].DotA.Y - _b.Y) * Math.Abs(triangleCollisions[0].DotA.Y - _b.Y));
+            //float dotBtoPoint = (float)Math.Sqrt(Math.Abs(triangleCollisions[0].DotB.X - _b.X) * Math.Abs(triangleCollisions[0].DotB.X - _b.X) + Math.Abs(triangleCollisions[0].DotB.Y - _b.Y) * Math.Abs(triangleCollisions[0].DotB.Y - _b.Y));
+            //float dotCtoPoint = (float)Math.Sqrt(Math.Abs(triangleCollisions[0].DotC.X - _b.X) * Math.Abs(triangleCollisions[0].DotC.X - _b.X) + Math.Abs(triangleCollisions[0].DotC.Y - _b.Y) * Math.Abs(triangleCollisions[0].DotC.Y - _b.Y));
+            //float areaABP = 0.5 * Math.Abs(triangleCollisions[0].DotA.X * y2 + triangleCollisions[0].DotB.X * _b.Y + _b.X * y1 - y1 * triangleCollisions[0].DotB.X - y2 * _b.X - _b.Y * triangleCollisions[0].DotA.X)
+            //float areaABP = 0.5 * abs(triangleCollisions[0].DotA.X * triangleCollisions[0].DotB.Y + triangleCollisions[0].DotB.X * y3 + x3 * triangleCollisions[0].DotA.Y - triangleCollisions[0].DotA.Y * triangleCollisions[0].DotB.X - triangleCollisions[0].DotB.Y * x3 - y3 * triangleCollisions[0].DotA.X);
+
+
+
+
             
-            coyoteFrames--;
+            /*
+            Vector2 mouse = new Vector2(mousex, mousey);
+
+            float areaSum2 = area(triangleCollisions[0].DotA, triangleCollisions[0].DotB, mouse)
+              + area(triangleCollisions[0].DotB, triangleCollisions[0].DotC, mouse)
+              + area(triangleCollisions[0].DotA, triangleCollisions[0].DotC, mouse);
+
+            float triangleArea2 = area(triangleCollisions[0].DotA, triangleCollisions[0].DotC, triangleCollisions[0].DotB);
+
+            if (Math.Abs(areaSum2 - triangleArea2) < 0.05f)
+            {
+                Debug.WriteLine("bachka");
+            }*/
+
+
+
+
+                coyoteFrames--;
         }
+        
         private void DrawLine(SpriteBatch spriteBatch, Texture2D texture, Vector2 start, Vector2 end)
         {
             spriteBatch.Draw(texture, start, null, Microsoft.Xna.Framework.Color.Green,
@@ -232,6 +329,39 @@ namespace graphook
                              new Vector2(Vector2.Distance(start, end), 1f),
                              SpriteEffects.None, 0f);
         }
+        private Vector2 FindIntersection(Vector2 A, Vector2 B, Vector2 C, Vector2 D)
+        {
+            Vector2 r = B - A;
+            Vector2 s = D - C;
+
+            float denominator = Cross(r, s);
+
+            if (MathF.Abs(denominator) < 1e-6f)
+            {
+                return new Vector2(0, 0); //null
+                
+            }
+
+            Vector2 AC = C - A;
+            float t = Cross(AC, s) / denominator;
+            float u = Cross(AC, r) / denominator;
+
+            if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+            {
+                return A + t * r;
+            }
+            return new Vector2(0, 0);
+
+        }
+
+        private static float Cross(Vector2 a, Vector2 b)
+        {
+            return a.X * b.Y - a.Y * b.X;
+        }
+        private float area(Vector2 p1, Vector2 p2, Vector2 p3)
+        {
+            return 0.5f * Math.Abs(p1.X * p2.Y + p2.X * p3.Y + p3.X * p1.Y - p1.Y * p2.X - p2.Y * p3.X - p3.Y * p1.X);
+        }
         public void Draw(SpriteBatch spriteBatch)
         {
 
@@ -239,8 +369,10 @@ namespace graphook
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
 
             Rectangle destinationRectangle = new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
-
+            Rectangle destinationRectangle2 = new Rectangle((int)FindIntersection(_b, _d, triangleCollisions[0].DotA, triangleCollisions[0].DotB).X, (int)FindIntersection(_b, _d, triangleCollisions[0].DotA, triangleCollisions[0].DotB).Y, 16, 16);
+            
             spriteBatch.Draw(whiteTexture, destinationRectangle, Microsoft.Xna.Framework.Color.Green);
+            spriteBatch.Draw(whiteTexture, destinationRectangle2, Microsoft.Xna.Framework.Color.Purple);
         }
     }
 }

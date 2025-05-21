@@ -27,7 +27,10 @@ namespace graphook
         Effect bloomCombineEffect;
         public static Texture2D PixelTexture;
         fireSystem fire;
-
+        private List<triCol> triCollisions;
+        RenderTarget2D renderTarget;
+        int virtualWidth = 960;
+        int virtualHeight = 540;
         Texture2D selector;
         private Random random;
         Texture2D crosshair;
@@ -58,6 +61,7 @@ namespace graphook
 
         protected override void Initialize()
         {
+            this.Window.AllowUserResizing = true;
             // Set the preferred resolution before calling base.Initialize()
             graphics.PreferredBackBufferWidth = 960;  // Set width
             graphics.PreferredBackBufferHeight = 540;  // Set height
@@ -68,6 +72,7 @@ namespace graphook
 
         protected override void LoadContent()
         {
+            renderTarget = new RenderTarget2D(GraphicsDevice, virtualWidth, virtualHeight);
             spriteBatch = new SpriteBatch(GraphicsDevice);
             bloomCombineEffect = Content.Load<Effect>("BloomCombine");
             saturationEffect = Content.Load<Effect>("SaturationShader");
@@ -95,13 +100,15 @@ namespace graphook
             random = new Random();
             dd = 0;
 
-
-            player = new Entity(collisions, textures2, spriteBatch);
+            
+            triCollisions = [new triCol(new Vector2(50, 400), new Vector2(325, 100), new Vector2(600, 400))];
+            player = new Entity(collisions, textures2, spriteBatch, triCollisions);
             player.dcl.player = player;
             foreach (var cl in cls)
             {
                 collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, player.dcl.Position));
             }
+            
         }
 
         protected override void UnloadContent()
@@ -170,7 +177,7 @@ namespace graphook
 
 
 
-            GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.SetRenderTarget(renderTarget);
             GraphicsDevice.Clear(new Color(68, 179, 248, 255));
 
             fire.Draw(spriteBatch);
@@ -220,6 +227,11 @@ namespace graphook
                 
                 collisions[i].Draw(spriteBatch);
             }
+            for (int i = 0; i < triCollisions.Count; i++)
+            {
+
+                triCollisions[i].Draw(spriteBatch);
+            }
 
 
             //aim !!!
@@ -249,7 +261,33 @@ namespace graphook
             bloomCombineEffect.CurrentTechnique.Passes[0].Apply();
             spriteBatch.Draw(crosshairTarget, new Vector2(mousex, mousey), Color.White);
             spriteBatch.End();
+            GraphicsDevice.SetRenderTarget(null); // Set backbuffer
 
+            // Optional: clear screen before final draw
+            GraphicsDevice.Clear(Color.Black);
+
+            // Maintain aspect ratio (optional)
+            float scaleX = GraphicsDevice.Viewport.Width / (float)virtualWidth;
+            float scaleY = GraphicsDevice.Viewport.Height / (float)virtualHeight;
+            float scale = Math.Min(scaleX, scaleY);
+
+            int displayWidth = (int)(virtualWidth * scale);
+            int displayHeight = (int)(virtualHeight * scale);
+            int offsetX = (GraphicsDevice.Viewport.Width - displayWidth) / 2;
+            int offsetY = (GraphicsDevice.Viewport.Height - displayHeight) / 2;
+
+            Rectangle dstRect = new Rectangle(offsetX, offsetY, displayWidth, displayHeight);
+
+            spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.Opaque,
+                SamplerState.PointClamp, // no blurring
+                DepthStencilState.Default,
+                RasterizerState.CullNone
+            );
+
+            spriteBatch.Draw(renderTarget, dstRect, Color.White);
+            spriteBatch.End();
             base.Draw(gameTime);
         }
 
