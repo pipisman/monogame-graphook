@@ -45,6 +45,7 @@ namespace graphook
         float cloudXoffset = 0;
         Collision collision1;
         Entity player;
+        bhcontroller blackhole;
         Texture2D torch;
         List<clsData> cls;
         KeyboardState newState = Keyboard.GetState();
@@ -88,6 +89,7 @@ namespace graphook
             textures.Add(fireTexture);
             textures2.Add(Content.Load<Texture2D>("amogus2"));
             particleSystem = new ParticleSystem_sin(textures, new Vector2(400, 240));
+            blackhole = new bhcontroller(textures, new Vector2(400, 240));
             fire = new fireSystem(textures, new Vector2(400, 240));
             Debug.WriteLine("Current directory: " + Directory.GetCurrentDirectory());
             string json = File.ReadAllText("collisions.json");
@@ -101,7 +103,7 @@ namespace graphook
             dd = 0;
 
             
-            triCollisions = [new triCol(new Vector2(50, 400), new Vector2(325, 100), new Vector2(600, 400))];
+            triCollisions = [new triCol(new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0))];
             player = new Entity(collisions, textures2, spriteBatch, triCollisions);
             player.dcl.player = player;
             foreach (var cl in cls)
@@ -221,7 +223,8 @@ namespace graphook
                 }
             }
             player.positions.Clear();
-
+            blackhole.Update(69);
+            
             for (int i = 0; i < collisions.Count; i++)
             {
                 
@@ -232,7 +235,7 @@ namespace graphook
 
                 triCollisions[i].Draw(spriteBatch);
             }
-
+            blackhole.Draw(spriteBatch);
 
             //aim !!!
 

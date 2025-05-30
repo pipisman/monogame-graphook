@@ -77,6 +77,7 @@ namespace graphook
                         if (j == 1)
                         {
                             Position = new Vector2(Position.X, Position.Y - Math.Abs(dot.Y - _a.Y));
+                            coyoteFrames = 6;
                         }
                     }
                 }
@@ -103,6 +104,7 @@ namespace graphook
                             if (intersection != Vector2.Zero)
                             {
                                 Position = new Vector2(Position.X, Position.Y - Math.Abs(intersection.Y - _b.Y));
+                                coyoteFrames = 6;
                             }
                             
                         }
@@ -112,6 +114,7 @@ namespace graphook
                             if (intersection != Vector2.Zero)
                             {
                                 Position = new Vector2(Position.X, Position.Y - Math.Abs(intersection.Y - _b.Y));
+                                coyoteFrames = 6;
                             }
                             
                         }
@@ -333,7 +336,7 @@ namespace graphook
         {
             Vector2 r = B - A;
             Vector2 s = D - C;
-
+            
             float denominator = Cross(r, s);
 
             if (MathF.Abs(denominator) < 1e-6f)
@@ -341,7 +344,8 @@ namespace graphook
                 return new Vector2(0, 0); //null
                 
             }
-
+            //https://content.byui.edu/file/b8b83119-9acc-4a7b-bc84-efacf9043998/1/Math-2-11-2.html
+            //https://www.youtube.com/watch?v=R0bGxNzgL2o   
             Vector2 AC = C - A;
             float t = Cross(AC, s) / denominator;
             float u = Cross(AC, r) / denominator;
@@ -370,9 +374,10 @@ namespace graphook
 
             Rectangle destinationRectangle = new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
             Rectangle destinationRectangle2 = new Rectangle((int)FindIntersection(_b, _d, triangleCollisions[0].DotA, triangleCollisions[0].DotB).X, (int)FindIntersection(_b, _d, triangleCollisions[0].DotA, triangleCollisions[0].DotB).Y, 16, 16);
-            
+            Rectangle destinationRectangle3 = new Rectangle((int)FindIntersection(_a, _c, triangleCollisions[0].DotC, triangleCollisions[0].DotB).X, (int)FindIntersection(_a, _c, triangleCollisions[0].DotC, triangleCollisions[0].DotB).Y, 16, 16);
             spriteBatch.Draw(whiteTexture, destinationRectangle, Microsoft.Xna.Framework.Color.Green);
             spriteBatch.Draw(whiteTexture, destinationRectangle2, Microsoft.Xna.Framework.Color.Purple);
+            spriteBatch.Draw(whiteTexture, destinationRectangle3, Microsoft.Xna.Framework.Color.Purple);
         }
     }
 }
