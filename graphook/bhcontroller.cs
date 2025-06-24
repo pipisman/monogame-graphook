@@ -9,7 +9,7 @@ namespace graphook
 {
     public class bhcontroller
     {
-        float initRadius = 200;
+        float initRadius = 40;
         private Random random;
         public Vector2 EmitterLocation { get; set; }
         private List<bh_particle> particles;
@@ -56,7 +56,7 @@ namespace graphook
             float angle = 0;
             float angularVelocity = 0;
             Microsoft.Xna.Framework.Color color = new Microsoft.Xna.Framework.Color(0, 0, 0);
-            float size = (float)random.NextDouble() * 1.35f;
+            float size = (float)random.NextDouble() * 0.7f;
             int ttl = 40;
 
             return new bh_particle(texture, position, velocity, angle, angularVelocity, color, size, ttl, initRadius);

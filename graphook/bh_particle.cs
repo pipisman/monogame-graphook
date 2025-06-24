@@ -42,7 +42,7 @@ namespace graphook
             TTL = ttl;
             initRadius = radius;
             random = new Random();
-            colorMod = new Color((int)((float)random.NextDouble() * 125), 0, (int)((float)random.NextDouble() * 180));
+            colorMod = new Color((int)((float)random.NextDouble() * 255), (int)((float)random.NextDouble() * 255), (int)((float)random.NextDouble() * 255));
             initpos = Position;
         }
 
@@ -63,7 +63,7 @@ namespace graphook
             Position = new Vector2(initpos.X + x1, initpos.Y + y1);
             
 
-            initRadius -= 0.04f;
+            initRadius -= 0.01f;
             Angle += AngularVelocity;
             
 
