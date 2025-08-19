@@ -35,7 +35,7 @@ namespace graphook
                 particles.Add(GenerateNewParticle(type));
 
             }
-           
+
 
 
 
@@ -51,7 +51,7 @@ namespace graphook
         }
 
         private fireParticle GenerateNewParticle(int type)
-        { 
+        {
             if (type == 0)
             {
                 Texture2D texture = textures[random.Next(textures.Count)];
@@ -62,11 +62,12 @@ namespace graphook
                 float angularVelocity = 0.1f * (float)(random.NextDouble() * 2 - 1);
                 Microsoft.Xna.Framework.Color color = new Microsoft.Xna.Framework.Color(255, 255, 255);
                 float size = (float)random.NextDouble();
-                int ttl = random.Next(20,43);
+                int ttl = random.Next(20, 43);
 
                 return new fireParticle(texture, position, velocity, angle, angularVelocity, color, size, ttl, type);
             }
-            else if (type == 1) {
+            else if (type == 1)
+            {
                 Texture2D texture = textures[random.Next(textures.Count)];
                 Vector2 position = new Vector2(EmitterLocation.X + random.Next(0, 17) - 8, EmitterLocation.Y);
                 Vector2 velocity = new Vector2((float)random.NextDouble() * 1.5f - 0.75f, -(float)random.NextDouble() - 1);
@@ -87,14 +88,15 @@ namespace graphook
 
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, int xoffset, int yoffset)
         {
             spriteBatch.Begin();
             for (int index = 0; index < particles.Count; index++)
             {
-                particles[index].Draw(spriteBatch);
+                particles[index].Draw(spriteBatch, xoffset, yoffset);
             }
             spriteBatch.End();
         }
+        
     }
 }

@@ -17,7 +17,7 @@ namespace graphook
 {
     internal class DCollision
     {
-        
+        public int Gravity = 20;
         public int fallingSpeed = 20;
         public Vector2 Position { get; set; }
         public Vector2 PreviousPosition { get; set; }
@@ -33,9 +33,16 @@ namespace graphook
         public bool isActivated;
         public Vector2 _a;
         public Vector2 _b;
+        public int xoffset;
+        public int yoffset;
         public Vector2 _c;
         public Vector2 _d;
         private List<Vector2> dots;
+        float lfym;
+        
+        bool coollideLastFrame;
+        private Rectangle flaggedRectangle;
+        private Rectangle flaggedRectangleY;
         public DCollision(Vector2 position, Vector2 previousPosition, int width, int height, List<Collision> Collisions, List<triCol> triangleCollisions)
         {
             this.triangleCollisions = triangleCollisions;
@@ -84,8 +91,7 @@ namespace graphook
 
                 for (int c = 0; c < dots.Count; c++)
                 {
-                    Debug.WriteLine(dots[c].X + " and " + dots[c].Y);
-                    Debug.WriteLine(_b);
+                    
                     float areaSum = area(triangleCollisions[i].DotA, triangleCollisions[i].DotB, dots[c])
                       + area(triangleCollisions[i].DotB, triangleCollisions[i].DotC, dots[c])
                       + area(triangleCollisions[i].DotA, triangleCollisions[i].DotC, dots[c]);
@@ -125,6 +131,7 @@ namespace graphook
             }
 
             //pravoygulnik
+            /*
             for (int i = 0; i < collisions.Count; i++)
             {
                 if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
@@ -141,7 +148,7 @@ namespace graphook
                     float v = _b.Y - collisions[i]._c.Y;
                     int diffY = Math.Abs((int)v);
                     int yOffset = 0;
-                    
+
                     while (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
                     && _a.Y > collisions[i]._c.Y && _a.Y < collisions[i]._a.Y
                     && _b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
@@ -198,7 +205,7 @@ namespace graphook
                         Position = player.prp;
                         return;
                     }
-                    
+
                     colliding = true;
                     //Debug.WriteLine("Collision detected at _a");
                     float v = _a.Y - collisions[i]._d.Y;
@@ -289,6 +296,211 @@ namespace graphook
 
 
             }
+            */
+            
+            List<Rectangle> flaggedCollisions = new List<Rectangle>();
+            List<Rectangle> flaggedCollisionsY = new List<Rectangle>();
+            Rectangle a = new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
+            
+            for (int i = 0; i < collisions.Count; i++)
+            {
+                Rectangle b = new Rectangle((int)collisions[i].Position.X, (int)collisions[i].Position.Y, collisions[i].Width, collisions[i].Height);
+                Rectangle aint = Rectangle.Intersect(a, b);
+                if (aint != Rectangle.Empty)
+                {
+                    Vector2 aCenter = new Vector2(a.X + a.Width / 2f, a.Y + a.Height / 2f);
+                    Vector2 bCenter = new Vector2(b.X + b.Width / 2f, b.Y + b.Height / 2f);
+
+                    //collisions[i-1] 
+                    
+                    if (aint.Width > aint.Height)
+                    {
+                        //allCollisions[]=[]
+                        //Console.WriteLine("height: " + aint.Height + " width: " + aint.Width + " vector a: " + a.X + ", " + a.Y + " vector b: " + b.X + ", " + b.Y);
+
+                        //if (coollideLastFrame)
+                        //{
+                            
+                        //}   
+                        if (aCenter.Y < bCenter.Y)
+                        {
+                            flaggedCollisions.Add(b);
+                            //Position = new Vector2(Position.X, Position.Y - aint.Height);
+                            lfym = aint.Height;
+                            coyoteFrames = 999999;
+                        }
+                        else
+                        {
+                            flaggedCollisions.Add(b);
+                        }
+                    }
+                    else
+                    {
+                        if (aCenter.X < bCenter.X)
+                        {
+                            flaggedCollisionsY.Add(b);
+                            fallingSpeed = 5;
+                        }
+                        else
+                        {
+                            flaggedCollisionsY.Add(b);
+                            fallingSpeed = 5;
+                        }
+
+                    }
+                    //break;
+                    coollideLastFrame = true;
+                }
+                else
+                {
+                    coollideLastFrame = false;
+                    lfym = 0;
+                }
+            }
+            flaggedRectangle = Rectangle.Empty;
+            flaggedRectangleY = Rectangle.Empty;
+
+            if (flaggedCollisionsY.Any())
+            {
+                Vector2 aCenter = new Vector2(a.X + a.Width / 2f, a.Y + a.Height / 2f);
+
+                if (flaggedCollisionsY.Count > 1)
+                {
+
+                    int CenterY = (flaggedCollisionsY[0].Y + flaggedCollisionsY[1].Y) / 2;
+                    if (CenterY < Position.Y)
+                    {
+                        flaggedRectangleY = flaggedCollisionsY[0];
+                        Vector2 bCenter = new Vector2(flaggedCollisionsY[0].X + flaggedCollisionsY[0].Width / 2f, flaggedCollisionsY[0].Y + flaggedCollisionsY[0].Height / 2f);
+                        Rectangle aint = Rectangle.Intersect(a, flaggedCollisionsY[0]);
+
+                        if (aCenter.X < bCenter.X)
+                        {
+                            Position = new Vector2(Position.X - aint.Width - 2, Position.Y);
+                        }
+                        else
+                        {
+                            Position = new Vector2(Position.X + aint.Width + 2, Position.Y);
+                        }
+
+                    }
+                    if (CenterY > Position.X)
+                    {
+                        flaggedRectangleY = flaggedCollisionsY[1];
+                        Vector2 bCenter = new Vector2(flaggedCollisionsY[1].X + flaggedCollisionsY[1].Width / 2f, flaggedCollisionsY[1].Y + flaggedCollisionsY[1].Height / 2f);
+
+                        Rectangle aint = Rectangle.Intersect(a, flaggedCollisionsY[1]);
+                        if (aCenter.X < bCenter.X)
+                        {
+                            Position = new Vector2(Position.X - aint.Width - 2, Position.Y);
+                        }
+                        else
+                        {
+                            Position = new Vector2(Position.X + aint.Width + 2, Position.Y);
+                        }
+                    }
+                    if (CenterY == Position.Y)
+                    {
+                        flaggedRectangleY = flaggedCollisionsY[0];
+                        Vector2 bCenter = new Vector2(flaggedCollisionsY[0].X + flaggedCollisionsY[0].Width / 2f, flaggedCollisionsY[0].Y + flaggedCollisionsY[0].Height / 2f);
+                        Rectangle aint = Rectangle.Intersect(a, flaggedCollisionsY[0]);
+                        if (aCenter.X < bCenter.X)
+                        {
+                            Position = new Vector2(Position.X - aint.Width, Position.Y);
+                        }
+                        else
+                        {
+                            Position = new Vector2(Position.X + aint.Width, Position.Y);
+                        }
+                    }
+                }
+                else
+                {
+                    flaggedRectangleY = flaggedCollisionsY[0];
+                    Vector2 bCenter = new Vector2(flaggedCollisionsY[0].X + flaggedCollisionsY[0].Width / 2f, flaggedCollisionsY[0].Y + flaggedCollisionsY[0].Height / 2f);
+                    Rectangle aint = Rectangle.Intersect(a, flaggedCollisionsY[0]);
+                    if (aCenter.X < bCenter.X)
+                    {
+                        Position = new Vector2(Position.X - aint.Width, Position.Y);
+                    }
+                    else
+                    {
+                        Position = new Vector2(Position.X + aint.Width, Position.Y);
+                    }
+                }
+            }
+            
+            
+            if (flaggedCollisions.Any())
+            {
+                Vector2 aCenter = new Vector2(a.X + a.Width / 2f, a.Y + a.Height / 2f);
+                if (flaggedCollisions.Count > 1)
+                {
+                    int Centerx = (flaggedCollisions[0].X + flaggedCollisions[1].X) / 2;
+                    if (Centerx < Position.X)
+                    {
+                        flaggedRectangle = flaggedCollisions[0];
+                        Vector2 bCenter = new Vector2(flaggedCollisions[0].X + flaggedCollisions[0].Width / 2f, flaggedCollisions[0].Y + flaggedCollisions[0].Height / 2f);
+                        Rectangle aint = Rectangle.Intersect(a, flaggedCollisions[0]);
+                        if (aCenter.Y < bCenter.Y)
+                        {
+                        
+                            Position = new Vector2(Position.X, Position.Y - aint.Height);
+                        }
+                        else
+                        {
+                            Position = new Vector2(Position.X, Position.Y + aint.Height);
+                        }
+                    }
+                    if (Centerx > Position.X)
+                    {
+                        flaggedRectangle = flaggedCollisions[1];
+                        Vector2 bCenter = new Vector2(flaggedCollisions[1].X + flaggedCollisions[1].Width / 2f, flaggedCollisions[1].Y + flaggedCollisions[1].Height / 2f);
+                        Rectangle aint = Rectangle.Intersect(a, flaggedCollisions[1]);
+                        if (aCenter.Y < bCenter.Y)
+                        {
+                            Position = new Vector2(Position.X, Position.Y - aint.Height);
+                        }
+                        else
+                        {
+                            Position = new Vector2(Position.X, Position.Y + aint.Height);
+                        }
+                    }
+                    if (Centerx == Position.X)
+                    {
+                        flaggedRectangle = flaggedCollisions[0];
+                        Vector2 bCenter = new Vector2(flaggedCollisions[0].X + flaggedCollisions[0].Width / 2f, flaggedCollisions[0].Y + flaggedCollisions[0].Height / 2f);
+                        Rectangle aint = Rectangle.Intersect(a, flaggedCollisions[0]);
+                        if (aCenter.Y < bCenter.Y)
+                        {
+                            Position = new Vector2(Position.X, Position.Y - aint.Height);
+                        }
+                        else
+                        {
+                            Position = new Vector2(Position.X, Position.Y + aint.Height);
+                        }
+                    }
+                }
+                else
+                {
+                    flaggedRectangle = flaggedCollisions[0];
+                    Vector2 bCenter = new Vector2(flaggedCollisions[0].X + flaggedCollisions[0].Width / 2f, flaggedCollisions[0].Y + flaggedCollisions[0].Height / 2f);
+                    Rectangle aint = Rectangle.Intersect(a, flaggedCollisions[0]);
+                    if (aCenter.Y < bCenter.Y)
+                    {
+                        Position = new Vector2(Position.X, Position.Y - aint.Height);
+                    }
+                    else
+                    {
+                        Position = new Vector2(Position.X, Position.Y + aint.Height);
+                    }
+                }
+            }
+            
+            flaggedCollisions.Clear();
+            flaggedCollisionsY.Clear();
+            
+
 
             //triygylnici
 
@@ -323,7 +535,42 @@ namespace graphook
 
                 coyoteFrames--;
         }
-        
+        public int checkCollisionY(int x)
+        {
+            int xMod = 0;
+            while (check(x - xMod))
+            {
+                if (x > 0)
+                    xMod++;
+                if (x < 0)
+                    xMod--;
+                if (!check(x - xMod))
+                {
+                    Console.WriteLine(x - xMod);
+                    
+                    return (x - xMod);
+                    
+                }
+                
+                    
+            }
+            return x;
+        }
+        private bool check(int x)
+        {
+            Rectangle a = new Rectangle((int)Position.X + x, (int)Position.Y, Width, Height);
+            for (int i = 0; i < collisions.Count; i++)
+            {
+                Rectangle b = new Rectangle((int)collisions[i].Position.X, (int)collisions[i].Position.Y, collisions[i].Width, collisions[i].Height);
+                Rectangle aint = Rectangle.Intersect(a, b);
+                if (aint != Rectangle.Empty)
+                {
+                    return true;
+                }
+            }
+            return false;
+
+        }
         private void DrawLine(SpriteBatch spriteBatch, Texture2D texture, Vector2 start, Vector2 end)
         {
             spriteBatch.Draw(texture, start, null, Microsoft.Xna.Framework.Color.Green,
@@ -366,18 +613,20 @@ namespace graphook
         {
             return 0.5f * Math.Abs(p1.X * p2.Y + p2.X * p3.Y + p3.X * p1.Y - p1.Y * p2.X - p2.Y * p3.X - p3.Y * p1.X);
         }
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, int xoffset, int yoffset)
         {
 
             Texture2D whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
 
-            Rectangle destinationRectangle = new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
+            Rectangle destinationRectangle = new Rectangle((int)Position.X + xoffset, (int)Position.Y + yoffset, Width, Height);
             Rectangle destinationRectangle2 = new Rectangle((int)FindIntersection(_b, _d, triangleCollisions[0].DotA, triangleCollisions[0].DotB).X, (int)FindIntersection(_b, _d, triangleCollisions[0].DotA, triangleCollisions[0].DotB).Y, 16, 16);
             Rectangle destinationRectangle3 = new Rectangle((int)FindIntersection(_a, _c, triangleCollisions[0].DotC, triangleCollisions[0].DotB).X, (int)FindIntersection(_a, _c, triangleCollisions[0].DotC, triangleCollisions[0].DotB).Y, 16, 16);
             spriteBatch.Draw(whiteTexture, destinationRectangle, Microsoft.Xna.Framework.Color.Green);
             spriteBatch.Draw(whiteTexture, destinationRectangle2, Microsoft.Xna.Framework.Color.Purple);
             spriteBatch.Draw(whiteTexture, destinationRectangle3, Microsoft.Xna.Framework.Color.Purple);
+            spriteBatch.Draw(whiteTexture, flaggedRectangleY, Microsoft.Xna.Framework.Color.Black);
+            spriteBatch.Draw(whiteTexture, flaggedRectangle, Microsoft.Xna.Framework.Color.Purple);
         }
     }
 }

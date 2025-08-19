@@ -63,14 +63,14 @@ namespace graphook
             
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, int xoffset, int yoffset)
         {
             
             Microsoft.Xna.Framework.Rectangle sourceRectangle = new Microsoft.Xna.Framework.Rectangle(0, 0, Texture.Width, Texture.Height);
             Vector2 origin = new Vector2(Texture.Width / 2, Texture.Height / 2);
             //spriteBatch.Draw(Texture, new Vector2(Position.X, Position.Y + 3), sourceRectangle, Color.DarkCyan,
             //    Angle, origin, Size, SpriteEffects.None, 0f);
-            spriteBatch.Draw(Texture, Position, sourceRectangle, Color,
+            spriteBatch.Draw(Texture, new Vector2(Position.X + xoffset ,Position.Y + yoffset), sourceRectangle, Color,
                 Angle, origin, Size, SpriteEffects.None, 0f);
 
         }

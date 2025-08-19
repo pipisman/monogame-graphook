@@ -14,6 +14,13 @@ using Microsoft.Xna.Framework.Media;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 using System.Text.Json;
 using NVorbis;
+using System.Threading.Tasks;
+
+
+
+
+
+//are da napraish tupata camera a?
 namespace graphook
 {
     public class Game1 : Microsoft.Xna.Framework.Game
@@ -31,6 +38,8 @@ namespace graphook
         RenderTarget2D renderTarget;
         int virtualWidth = 960;
         int virtualHeight = 540;
+        int xoffset;
+        int yoffset;
         Texture2D selector;
         private Random random;
         Texture2D crosshair;
@@ -48,10 +57,13 @@ namespace graphook
         bhcontroller blackhole;
         Texture2D torch;
         List<clsData> cls;
+        Texture2D whiteTexture;
+
         KeyboardState newState = Keyboard.GetState();
         List<Collision> collisions = new List<Collision>();
         int mousex;
         int mousey;
+        List<string> Stextures;
         float hue;
         Effect saturationEffect;
         public Game1()
@@ -77,8 +89,9 @@ namespace graphook
             spriteBatch = new SpriteBatch(GraphicsDevice);
             bloomCombineEffect = Content.Load<Effect>("BloomCombine");
             saturationEffect = Content.Load<Effect>("SaturationShader");
-            Texture2D whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+            whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
+            //whiteTexture = Content.Load<Texture2D>("testile");
             crosshair = Content.Load<Texture2D>("crosshair2");
             selector = Content.Load<Texture2D>("selector");
             crosshairTarget = new RenderTarget2D(GraphicsDevice, crosshair.Width, crosshair.Height);
@@ -94,23 +107,47 @@ namespace graphook
             Debug.WriteLine("Current directory: " + Directory.GetCurrentDirectory());
             string json = File.ReadAllText("collisions.json");
             cls = JsonSerializer.Deserialize<List<clsData>>(json);
-            
+
 
 
             water = new waterController(330, 3, whiteTexture);
             int springAmount = 70;
             random = new Random();
             dd = 0;
-
-            
+            List<Texture2D> Tiles = new List<Texture2D>();
+            Stextures = new List<string>();
             triCollisions = [new triCol(new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0))];
             player = new Entity(collisions, textures2, spriteBatch, triCollisions);
             player.dcl.player = player;
             foreach (var cl in cls)
             {
-                collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, player.dcl.Position));
+                if (Stextures.Any())
+                {
+                    bool ExistingTexture = false;
+                    for (int i = 0; i < Stextures.Count; i++)
+                    {
+                        if (cl.Texture == Stextures[i])
+                        {
+                            collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, Tiles[i]));
+                            ExistingTexture = true;
+                        }
+                    }
+                    if (ExistingTexture == false)
+                    {
+                        Stextures.Add(cl.Texture);
+                        Tiles.Add(Content.Load<Texture2D>(Stextures[Stextures.Count() - 1]));
+                    }
+                    
+                }
+                else
+                {
+                    Stextures.Add(cl.Texture);
+                    Tiles.Add(Content.Load<Texture2D>(Stextures[0]));
+                    collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, Tiles[0]));
+                }
+                
             }
-            
+
         }
 
         protected override void UnloadContent()
@@ -127,10 +164,30 @@ namespace graphook
             mousex = Mouse.GetState().X;
             mousey = Mouse.GetState().Y;
 
-            if (newState.IsKeyDown(Keys.R)) {
+            if (newState.IsKeyDown(Keys.R))
+            {
                 player.dcl.Position = new Vector2(90, 300);
             }
-
+            if (newState.IsKeyDown(Keys.Right))
+            {
+                xoffset++;
+                xoffset++;
+            }
+            if (newState.IsKeyDown(Keys.Left))
+            {
+                xoffset--;
+                xoffset--;
+            }
+            if (newState.IsKeyDown(Keys.Down))
+            {
+                yoffset++;
+                yoffset++;
+            }
+            if (newState.IsKeyDown(Keys.Up))
+            {
+                yoffset--;
+                yoffset--;
+            }
             water.Update(gameTime, newState, random);
             cloudXoffset += 0.3f;
             fire.Update(0);
@@ -181,10 +238,10 @@ namespace graphook
 
             GraphicsDevice.SetRenderTarget(renderTarget);
             GraphicsDevice.Clear(new Color(68, 179, 248, 255));
+ 
+            fire.Draw(spriteBatch, xoffset, yoffset);
 
-            fire.Draw(spriteBatch);
-
-            particleSystem.EmitterLocation = new Vector2(cloudXoffset, 75);
+            particleSystem.EmitterLocation = new Vector2(cloudXoffset + xoffset, 75 + yoffset);
             //particleSystem.Update(0);
             /*
             particleSystem.Draw(spriteBatch);
@@ -196,12 +253,12 @@ namespace graphook
 
 
             spriteBatch.Begin();
-            spriteBatch.Draw(torch, new Rectangle((int)fire.EmitterLocation.X - 16, (int)fire.EmitterLocation.Y - 18, torch.Width, torch.Height
+            spriteBatch.Draw(torch, new Rectangle(xoffset + (int)fire.EmitterLocation.X - 16, yoffset + (int)fire.EmitterLocation.Y - 18, torch.Width, torch.Height
                 ), new Color(255, 255, 255));
 
             for (int i = 0; i < player.positions.Count(); i++)
             {
-                spriteBatch.Draw(fireTexture, new Rectangle((int)player.positions[i].X, (int)player.positions[i].Y, fireTexture.Width, fireTexture.Height),
+                spriteBatch.Draw(fireTexture, new Rectangle(xoffset + (int)player.positions[i].X, yoffset + (int)player.positions[i].Y, fireTexture.Width, fireTexture.Height),
                     new Color(random.Next(100, 165), random.Next(40, 110), random.Next(0, 80)));
             }
             if (!player.positions.Any() && newState.IsKeyDown(Keys.LeftControl))
@@ -217,34 +274,35 @@ namespace graphook
 
                     double ghY1 = k * 9.5 * Math.Sin(angle);
                     Vector2 position = new Vector2((float)ghX1 + player.dcl.Position.X, (float)ghY1 + player.dcl.Position.Y);
-                    spriteBatch.Draw(selector, new Rectangle((int)position.X, (int)position.Y, selector.Width, selector.Height),
+                    spriteBatch.Draw(selector, new Rectangle((int)position.X + xoffset, (int)position.Y + yoffset, selector.Width, selector.Height),
                         new Color(255, 255, 255));
 
                 }
             }
             player.positions.Clear();
             blackhole.Update(69);
-            
+
             for (int i = 0; i < collisions.Count; i++)
             {
-                
-                collisions[i].Draw(spriteBatch);
+                collisions[i].Update();
+                collisions[i].Draw(spriteBatch, whiteTexture, xoffset, yoffset);
+
             }
             for (int i = 0; i < triCollisions.Count; i++)
             {
 
                 triCollisions[i].Draw(spriteBatch);
             }
-            blackhole.Draw(spriteBatch);
+            //blackhole.Draw(spriteBatch);
 
             //aim !!!
 
 
 
 
-            player.dcl.Draw(spriteBatch);
-            water.Draw(spriteBatch);
-            
+            player.dcl.Draw(spriteBatch, xoffset, yoffset);
+            //water.Draw(spriteBatch, xoffset, yoffset);
+
 
 
 

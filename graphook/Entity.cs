@@ -171,10 +171,12 @@ namespace graphook
             else {
                 if (!(cframes > 0))
                 {
-                    if (((currentState.IsKeyDown(Keys.A) && previousState.IsKeyDown(Keys.A)) || (currentState.IsKeyDown(Keys.D) && previousState.IsKeyDown(Keys.D))))
-                        subpy = dcl.fallingSpeed;
+                    if (((currentState.IsKeyDown(Keys.A) && previousState.IsKeyDown(Keys.A)) || (currentState.IsKeyDown(Keys.D) && previousState.IsKeyDown(Keys.D)))) {
+                        subpy = dcl.fallingSpeed + 5;
+                    }
+                        
                     else
-                        subpy = 20;
+                        subpy = 25;
                 }
             }
             if(cframes > 0)
@@ -187,17 +189,18 @@ namespace graphook
             {
                 if (currentState.IsKeyDown(Keys.D))
                 {
-                    vel.X = 20;
+
+                    vel.X = dcl.checkCollisionY(20);
                 }
                 if (currentState.IsKeyDown(Keys.A))
                 {
-                    vel.X = -20;
+                    vel.X = dcl.checkCollisionY(-20);
                 }
             }
-            if (currentState.IsKeyDown(Keys.Space) && !previousState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0 || wjf)
+            if (currentState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0 || wjf)
             {
-                vel.Y = -54;
-                dcl.coyoteFrames = 0;
+                vel.Y = -23;
+                dcl.coyoteFrames = 99999;
                 wjf = false;
                 particleFrames = 6;
                 

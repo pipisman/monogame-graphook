@@ -144,27 +144,27 @@ internal class Spring
             _ => new Color(v / 255f, p / 255f, q / 255f),
         };
     }
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(SpriteBatch spriteBatch, int xoffset, int yoffset)
     {
         if (numList == 0) return;
         Rectangle destinationRectangle = new Rectangle(
-            (int)startPos.X,
-            (int)Position,
+            (int)startPos.X + xoffset,
+            (int)Position + yoffset,
             6, 6
         );
         Rectangle destinationRectangle2 = new Rectangle(
-            (int)startPos.X,
-            (int)Position + 6,
+            (int)startPos.X + xoffset,
+            (int)Position + 6 + yoffset,
             6, 6
         );
         Rectangle destinationRectangle3 = new Rectangle(
-            (int)startPos.X,
-            (int)Position + 12,
+            (int)startPos.X + xoffset,
+            (int)Position + 12 + yoffset,
             6, 6
         );
         Rectangle destinationRectangle4 = new Rectangle(
-            (int)startPos.X,
-            (int)Position + 18,
+            (int)startPos.X + xoffset,
+            (int)Position + 18 + yoffset,
             6, 180
         );
 

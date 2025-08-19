@@ -50,11 +50,11 @@ namespace graphook
                 water[i].Update((float)gameTime.ElapsedGameTime.TotalSeconds);
             }
         }
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, int xoffset, int yoffset)
         {
             for (int i = 0; i < water.Count; i++)
             {
-                water[i].Draw(spriteBatch);
+                water[i].Draw(spriteBatch, xoffset, yoffset);
             }
         }
 
