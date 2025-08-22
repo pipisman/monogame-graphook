@@ -26,7 +26,6 @@ namespace graphook
         private int frequency;
         private Vector2 obj1;
         private Vector2 obj2;
-
         public raycast(List<Collision> Collisions, int distance, int frequency, Vector2 obj1, Vector2 obj2)
         {
 

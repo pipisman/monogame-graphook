@@ -25,6 +25,7 @@ namespace graphook
         public Vector2 _d;
         private Texture2D texture;
         public bool isFlagged;
+        
 
         public Collision(Vector2 position, int width, int height, Texture2D texture)
         {

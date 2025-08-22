@@ -327,7 +327,7 @@ namespace graphook
                             flaggedCollisions.Add(b);
                             //Position = new Vector2(Position.X, Position.Y - aint.Height);
                             lfym = aint.Height;
-                            coyoteFrames = 999999;
+                            coyoteFrames = 5;
                         }
                         else
                         {
@@ -625,8 +625,8 @@ namespace graphook
             spriteBatch.Draw(whiteTexture, destinationRectangle, Microsoft.Xna.Framework.Color.Green);
             spriteBatch.Draw(whiteTexture, destinationRectangle2, Microsoft.Xna.Framework.Color.Purple);
             spriteBatch.Draw(whiteTexture, destinationRectangle3, Microsoft.Xna.Framework.Color.Purple);
-            spriteBatch.Draw(whiteTexture, flaggedRectangleY, Microsoft.Xna.Framework.Color.Black);
-            spriteBatch.Draw(whiteTexture, flaggedRectangle, Microsoft.Xna.Framework.Color.Purple);
+            //spriteBatch.Draw(whiteTexture, flaggedRectangleY, Microsoft.Xna.Framework.Color.Black);
+            //spriteBatch.Draw(whiteTexture, flaggedRectangle, Microsoft.Xna.Framework.Color.Purple);
         }
     }
 }

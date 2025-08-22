@@ -197,10 +197,10 @@ namespace graphook
                     vel.X = dcl.checkCollisionY(-20);
                 }
             }
-            if (currentState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0 || wjf)
+            if (currentState.IsKeyDown(Keys.Space) && !previousState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0 || wjf)
             {
-                vel.Y = -23;
-                dcl.coyoteFrames = 99999;
+                vel.Y = -40;
+                
                 wjf = false;
                 particleFrames = 6;
                 

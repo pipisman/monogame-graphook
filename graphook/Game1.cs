@@ -65,8 +65,13 @@ namespace graphook
         int mousey;
         Texture2D error;
         List<string> Stextures;
+        Arrow arrow;
+        private Texture2D ArrowTexture;
         float hue;
         Effect saturationEffect;
+
+        public float Speed { get; internal set; }
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -90,6 +95,7 @@ namespace graphook
             spriteBatch = new SpriteBatch(GraphicsDevice);
             bloomCombineEffect = Content.Load<Effect>("BloomCombine");
             saturationEffect = Content.Load<Effect>("SaturationShader");
+            ArrowTexture = Content.Load<Texture2D>("arrow");
             whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
             //whiteTexture = Content.Load<Texture2D>("testile");
@@ -103,6 +109,10 @@ namespace graphook
             torch = Content.Load<Texture2D>("torch2");
             textures.Add(fireTexture);
             textures2.Add(Content.Load<Texture2D>("amogus2"));
+
+
+
+
             particleSystem = new ParticleSystem_sin(textures, new Vector2(400, 240));
             blackhole = new bhcontroller(textures, new Vector2(400, 240));
             fire = new fireSystem(textures, new Vector2(400, 240));
@@ -191,9 +201,10 @@ namespace graphook
                     }
                     tileLookup[cl.Texture] = tile;
                 }
-            
+
                 collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, tile));
             }
+            arrow = new Arrow(new Vector2(0, 0), ArrowTexture, collisions);
 
 
         }
@@ -211,7 +222,7 @@ namespace graphook
 
             mousex = Mouse.GetState().X;
             mousey = Mouse.GetState().Y;
-
+            arrow.Update(player.dcl.Position);
             if (newState.IsKeyDown(Keys.R))
             {
                 player.dcl.Position = new Vector2(90, 300);
@@ -345,12 +356,13 @@ namespace graphook
 
             //aim !!!
 
-
+            
 
 
             player.dcl.Draw(spriteBatch, xoffset, yoffset);
             //water.Draw(spriteBatch, xoffset, yoffset);
-
+            
+            arrow.Draw(spriteBatch, Color.White);
 
 
 
