@@ -59,6 +59,7 @@ namespace graphook
             {
                 spriteBatch.Draw(texture, destinationRectangle, Microsoft.Xna.Framework.Color.White);
             }
+            
             else
             {
                 spriteBatch.Draw(texture, destinationRectangle, Microsoft.Xna.Framework.Color.Purple);

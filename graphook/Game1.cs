@@ -63,6 +63,7 @@ namespace graphook
         List<Collision> collisions = new List<Collision>();
         int mousex;
         int mousey;
+        Texture2D error;
         List<string> Stextures;
         float hue;
         Effect saturationEffect;
@@ -98,6 +99,7 @@ namespace graphook
             List<Texture2D> textures = new List<Texture2D>();
             List<Texture2D> textures2 = new List<Texture2D>();
             fireTexture = Content.Load<Texture2D>("fire1");
+            error = Content.Load<Texture2D>("error");
             torch = Content.Load<Texture2D>("torch2");
             textures.Add(fireTexture);
             textures2.Add(Content.Load<Texture2D>("amogus2"));
@@ -119,6 +121,7 @@ namespace graphook
             triCollisions = [new triCol(new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0))];
             player = new Entity(collisions, textures2, spriteBatch, triCollisions);
             player.dcl.player = player;
+            /*
             foreach (var cl in cls)
             {
                 if (Stextures.Any())
@@ -128,25 +131,70 @@ namespace graphook
                     {
                         if (cl.Texture == Stextures[i])
                         {
-                            collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, Tiles[i]));
+                            try
+                            {
+                                collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, Tiles[i]));
+                            }
+                            catch
+                            {
+                                Tiles.Add(error);
+                            }
+
+
                             ExistingTexture = true;
                         }
                     }
                     if (ExistingTexture == false)
                     {
                         Stextures.Add(cl.Texture);
-                        Tiles.Add(Content.Load<Texture2D>(Stextures[Stextures.Count() - 1]));
+                        try
+                        {
+                            Tiles.Add(Content.Load<Texture2D>(Stextures[Stextures.Count() - 1]));
+                        }
+                        catch
+                        {
+                            Tiles.Add(error);
+                        }
+
                     }
-                    
+
                 }
                 else
                 {
                     Stextures.Add(cl.Texture);
+                    //try
+                    //{
                     Tiles.Add(Content.Load<Texture2D>(Stextures[0]));
+                    //}
+                    //catch
+                    //{
+                    //    Tiles.Add(Content.Load<Texture2D>("error"));
+                    //}
                     collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, Tiles[0]));
                 }
-                
+
             }
+            */
+            Dictionary<string, Texture2D> tileLookup = new Dictionary<string, Texture2D>();
+
+            foreach (var cl in cls)
+            {
+                if (!tileLookup.TryGetValue(cl.Texture, out Texture2D tile))
+                {
+                    try
+                    {
+                        tile = Content.Load<Texture2D>(cl.Texture);
+                    }
+                    catch
+                    {
+                        tile = error;
+                    }
+                    tileLookup[cl.Texture] = tile;
+                }
+            
+                collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, tile));
+            }
+
 
         }
 
