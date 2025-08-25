@@ -73,7 +73,7 @@ namespace graphook
                 double ghX1 = k * 5 * Math.Cos(angle * pi / 180);
 
                 double ghY1 = k * 5 * Math.Sin(angle * pi / 180);
-
+                
                 positions.Add(new Vector2((float)ghX1 + center.X + random.Next(-1, 2), (float)ghY1 + center.Y + random.Next(-1, 2)));
             }
             double x1 = triRad * Math.Cos(angle * pi / 180);
@@ -85,47 +85,24 @@ namespace graphook
             Vector2 _b = new Vector2(xr + 16, yr + 16);
             Vector2 _c = new Vector2(xr, yr);
             Vector2 _d = new Vector2(xr + 16, yr);
+            //isActivated = false
+            //return
+            
+            Rectangle a = new Rectangle((int)dcl.Position.X, (int)dcl.Position.Y, 16, 8);
             for (int i = 0; i < collisions.Count; i++)
             {
-                if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
-                    && _a.Y > collisions[i]._c.Y && _a.Y < collisions[i]._a.Y
-                    && _b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
-                    && _b.Y > collisions[i]._c.Y && _b.Y < collisions[i]._a.Y)
-                {
-                    isActivated = false;
-                    return;
-                }
-                else if (_b.X > collisions[i]._c.X && _b.X < collisions[i]._d.X
-                    && _b.Y > collisions[i]._c.Y && _b.Y < collisions[i]._a.Y)
-                {
-                    isActivated = false;
-                    return;
-                }
-                else if (_a.X > collisions[i]._c.X && _a.X < collisions[i]._d.X
-                    && _a.Y > collisions[i]._c.Y && _a.Y < collisions[i]._a.Y)
-                {
-                    isActivated = false;
-                    return;
-                }
-                else if (_d.X > collisions[i]._c.X && _d.X < collisions[i]._d.X
-                    && _d.Y > collisions[i]._c.Y && _d.Y < collisions[i]._a.Y)
-                {
-                    isActivated = false;
-                    return;
-                }
-                else if (_c.X > collisions[i]._c.X && _c.X < collisions[i]._d.X
-                    && _c.Y > collisions[i]._c.Y && _c.Y < collisions[i]._a.Y)
+                Rectangle b = new Rectangle((int)collisions[i].Position.X, (int)collisions[i].Position.Y, collisions[i].Width, collisions[i].Height);
+                Rectangle aint = Rectangle.Intersect(a, b);
+                if (aint != Rectangle.Empty)
                 {
                     isActivated = false;
                     return;
                 }
             }
-
-
             prp = dcl.Position;
             dcl.Position = new Vector2(center.X + (float)x1, center.Y + (float)y1);
         }
-        public void Update()
+        public void Update(int xoffset, int yoffset)
         {
 
             previousState = currentState;
@@ -142,7 +119,10 @@ namespace graphook
             if (vel2.Y < 1 && vel2.Y > -1) { vel2.Y = 0; }
 
             wjf = false;
-                
+            if (currentState.IsKeyDown(Keys.R))
+            {
+                dcl.Position = new Vector2(200, 200);
+            }
             if (dcl.istouchingwall && cooldown <= 0 && !previousState.IsKeyDown(Keys.Space) && currentState.IsKeyDown(Keys.Space))
             {
                 wjf = true;
@@ -199,7 +179,7 @@ namespace graphook
             }
             if (currentState.IsKeyDown(Keys.Space) && !previousState.IsKeyDown(Keys.Space) && dcl.coyoteFrames > 0 || wjf)
             {
-                vel.Y = -40;
+                vel.Y = -50;
                 
                 wjf = false;
                 particleFrames = 6;
@@ -218,7 +198,18 @@ namespace graphook
             if (currentMouseState.LeftButton == ButtonState.Pressed &&
                 previousMouseState.LeftButton == ButtonState.Released)
             {
-                ray = new raycast(collisions, 125, 5, dcl.Position, new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
+                float worldMouseX = Mouse.GetState().X - xoffset;
+                float worldMouseY = Mouse.GetState().Y - yoffset;
+                
+                float angle = (float)Math.Atan2(worldMouseY - dcl.Position.Y,
+                                worldMouseX - dcl.Position.X);
+
+
+
+                
+                ray = new raycast(collisions, 125, 5, dcl.Position, new Vector2(worldMouseX, worldMouseY));
+
+
                 if (ray.Collidepoint().collided)
                 {
 
@@ -234,7 +225,7 @@ namespace graphook
                     isActivated = true;
                     ab = triRad;
                     
-                    float angle = (float)Math.Atan2(rayy - dcl.Position.Y, rayx - dcl.Position.X);
+                    
                     i = (float)(angle * (180.0 / Math.PI)) + 180;
                     center = ray.Collidepoint().pos;
                     b = i;

@@ -10,7 +10,7 @@ using System.Reflection.Metadata;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 namespace graphook
 {
-    internal class Collision
+    public class Collision
     {
         Rectangle destinationRectangle;
         public Vector2 Position { get; set; }

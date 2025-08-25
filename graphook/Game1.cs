@@ -15,6 +15,7 @@ using Vector2 = Microsoft.Xna.Framework.Vector2;
 using System.Text.Json;
 using NVorbis;
 using System.Threading.Tasks;
+using editor;
 
 
 
@@ -66,8 +67,15 @@ namespace graphook
         Texture2D error;
         List<string> Stextures;
         Arrow arrow;
+        Grid grid;
         private Texture2D ArrowTexture;
+        int xofoffest = 0;
+        int yofoffest = 0;
         float hue;
+        float smoothXOffset = 0f;
+        float smoothYOffset = 0f;
+        float cameraDamping = 0.1f; // smaller = slower, smoother
+
         Effect saturationEffect;
 
         public float Speed { get; internal set; }
@@ -99,11 +107,12 @@ namespace graphook
             whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
             //whiteTexture = Content.Load<Texture2D>("testile");
-            crosshair = Content.Load<Texture2D>("crosshair2");
+            crosshair = Content.Load<Texture2D>("cursor");
             selector = Content.Load<Texture2D>("selector");
             crosshairTarget = new RenderTarget2D(GraphicsDevice, crosshair.Width, crosshair.Height);
             List<Texture2D> textures = new List<Texture2D>();
             List<Texture2D> textures2 = new List<Texture2D>();
+            grid = new Grid(0, 0, 60, 34, 16, whiteTexture);
             fireTexture = Content.Load<Texture2D>("fire1");
             error = Content.Load<Texture2D>("error");
             torch = Content.Load<Texture2D>("torch2");
@@ -220,33 +229,51 @@ namespace graphook
                 this.Exit();
             newState = Keyboard.GetState();
 
-            mousex = Mouse.GetState().X;
-            mousey = Mouse.GetState().Y;
+            mousex = Mouse.GetState().X + xoffset;
+            mousey = Mouse.GetState().Y  +yoffset;
             arrow.Update(player.dcl.Position);
+            for (int h = 0; h < 34; h++)
+            {
+                for (int w = 0; w < 60; w++)
+                {
+                    grid.lines[h].rows[w].Update(mousex - xoffset, mousey - yoffset, xoffset, yoffset, collisions, newState);
+                }
+            }
+            
             if (newState.IsKeyDown(Keys.R))
             {
                 player.dcl.Position = new Vector2(90, 300);
             }
             if (newState.IsKeyDown(Keys.Right))
             {
-                xoffset++;
-                xoffset++;
+                xofoffest++;
+                xofoffest++;
             }
             if (newState.IsKeyDown(Keys.Left))
             {
-                xoffset--;
-                xoffset--;
+                xofoffest--;
+                xofoffest--;
             }
             if (newState.IsKeyDown(Keys.Down))
             {
-                yoffset++;
-                yoffset++;
+                yofoffest++;
+                yofoffest++;
             }
             if (newState.IsKeyDown(Keys.Up))
             {
-                yoffset--;
-                yoffset--;
+                yofoffest--;
+                yofoffest--;
             }
+            
+            float targetXOffset = -(player.dcl.Position.X) + 192 + xofoffest;
+            float targetYOffset = -(player.dcl.Position.Y) + 324 + yofoffest;
+            
+            smoothXOffset = MathHelper.Lerp(smoothXOffset, targetXOffset, cameraDamping);
+            smoothYOffset = MathHelper.Lerp(smoothYOffset, targetYOffset, cameraDamping);
+            
+            xoffset = (int)smoothXOffset;
+            yoffset = (int)smoothYOffset;
+
             water.Update(gameTime, newState, random);
             cloudXoffset += 0.3f;
             fire.Update(0);
@@ -254,7 +281,7 @@ namespace graphook
             hue += (float)gameTime.ElapsedGameTime.TotalSeconds * 200f;
 
             if (hue >= 360f) hue -= 360f;
-            player.Update();
+            player.Update(xoffset, yoffset);
             base.Update(gameTime);
 
         }
@@ -286,7 +313,7 @@ namespace graphook
             Color rainbowColor = ColorFromHSV(hue, 1f, 1f);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(crosshair, new Rectangle(0, 0, crosshair.Width, crosshair.Height), rainbowColor);
+            
             spriteBatch.End();
 
 
@@ -297,7 +324,7 @@ namespace graphook
 
             GraphicsDevice.SetRenderTarget(renderTarget);
             GraphicsDevice.Clear(new Color(68, 179, 248, 255));
- 
+            
             fire.Draw(spriteBatch, xoffset, yoffset);
 
             particleSystem.EmitterLocation = new Vector2(cloudXoffset + xoffset, 75 + yoffset);
@@ -324,7 +351,13 @@ namespace graphook
             {
 
 
-                float angle = (float)Math.Atan2(mousey - player.dcl.Position.Y, mousex - player.dcl.Position.X);
+                                // Mouse position in world coordinates
+                float worldMouseX = Mouse.GetState().X - xoffset;
+                float worldMouseY = Mouse.GetState().Y - yoffset;
+
+                float angle = (float)Math.Atan2(worldMouseY - player.dcl.Position.Y,
+                                                worldMouseX - player.dcl.Position.X);
+
                 float x = player.dcl.Position.X + 125 * (float)Math.Cos(angle);
                 float y = player.dcl.Position.Y + 125 * (float)Math.Sin(angle);
                 for (int k = 0; k < 13; k++)
@@ -363,7 +396,7 @@ namespace graphook
             //water.Draw(spriteBatch, xoffset, yoffset);
             
             arrow.Draw(spriteBatch, Color.White);
-
+            spriteBatch.Draw(crosshair, new Rectangle(Mouse.GetState().X, Mouse.GetState().Y, crosshair.Width, crosshair.Height), Color.White);
 
 
             spriteBatch.End();
@@ -380,7 +413,6 @@ namespace graphook
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
             bloomCombineEffect.CurrentTechnique.Passes[0].Apply();
-            spriteBatch.Draw(crosshairTarget, new Vector2(mousex, mousey), Color.White);
             spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null); // Set backbuffer
 
