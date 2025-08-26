@@ -16,6 +16,7 @@ using System.Text.Json;
 using NVorbis;
 using System.Threading.Tasks;
 using editor;
+using System.ComponentModel;
 
 
 
@@ -73,12 +74,14 @@ namespace graphook
         int yofoffest = 0;
         float hue;
         float smoothXOffset = 0f;
+        Texture2D hookTexture;
         float smoothYOffset = 0f;
         float cameraDamping = 0.1f; // smaller = slower, smoother
 
         Effect saturationEffect;
 
         public float Speed { get; internal set; }
+        Texture2D ropeTexture;
 
         public Game1()
         {
@@ -101,19 +104,19 @@ namespace graphook
         {
             renderTarget = new RenderTarget2D(GraphicsDevice, virtualWidth, virtualHeight);
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            bloomCombineEffect = Content.Load<Effect>("BloomCombine");
-            saturationEffect = Content.Load<Effect>("SaturationShader");
             ArrowTexture = Content.Load<Texture2D>("arrow");
             whiteTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             whiteTexture.SetData(new[] { Microsoft.Xna.Framework.Color.White });
             //whiteTexture = Content.Load<Texture2D>("testile");
             crosshair = Content.Load<Texture2D>("cursor");
+            hookTexture = Content.Load<Texture2D>("hookt");
             selector = Content.Load<Texture2D>("selector");
             crosshairTarget = new RenderTarget2D(GraphicsDevice, crosshair.Width, crosshair.Height);
             List<Texture2D> textures = new List<Texture2D>();
             List<Texture2D> textures2 = new List<Texture2D>();
             grid = new Grid(0, 0, 60, 34, 16, whiteTexture);
             fireTexture = Content.Load<Texture2D>("fire1");
+            ropeTexture = Content.Load<Texture2D>("rope");
             error = Content.Load<Texture2D>("error");
             torch = Content.Load<Texture2D>("torch2");
             textures.Add(fireTexture);
@@ -198,6 +201,13 @@ namespace graphook
 
             foreach (var cl in cls)
             {
+                if (string.IsNullOrEmpty(cl.Texture))
+                {
+                    // If texture name is missing, use error texture
+                    collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, error));
+                    continue;
+                }
+
                 if (!tileLookup.TryGetValue(cl.Texture, out Texture2D tile))
                 {
                     try
@@ -213,6 +223,7 @@ namespace graphook
 
                 collisions.Add(new Collision(new Vector2(cl.X, cl.Y), cl.Width, cl.Height, tile));
             }
+
             arrow = new Arrow(new Vector2(0, 0), ArrowTexture, collisions);
 
 
@@ -231,7 +242,7 @@ namespace graphook
 
             mousex = Mouse.GetState().X + xoffset;
             mousey = Mouse.GetState().Y  +yoffset;
-            arrow.Update(player.dcl.Position);
+            arrow.Update(player.dcl.Position, xoffset, yoffset);
             for (int h = 0; h < 34; h++)
             {
                 for (int w = 0; w < 60; w++)
@@ -342,11 +353,7 @@ namespace graphook
             spriteBatch.Draw(torch, new Rectangle(xoffset + (int)fire.EmitterLocation.X - 16, yoffset + (int)fire.EmitterLocation.Y - 18, torch.Width, torch.Height
                 ), new Color(255, 255, 255));
 
-            for (int i = 0; i < player.positions.Count(); i++)
-            {
-                spriteBatch.Draw(fireTexture, new Rectangle(xoffset + (int)player.positions[i].X, yoffset + (int)player.positions[i].Y, fireTexture.Width, fireTexture.Height),
-                    new Color(random.Next(100, 165), random.Next(40, 110), random.Next(0, 80)));
-            }
+            
             if (!player.positions.Any() && newState.IsKeyDown(Keys.LeftControl))
             {
 
@@ -371,7 +378,7 @@ namespace graphook
 
                 }
             }
-            player.positions.Clear();
+            
             blackhole.Update(69);
 
             for (int i = 0; i < collisions.Count; i++)
@@ -395,25 +402,30 @@ namespace graphook
             player.dcl.Draw(spriteBatch, xoffset, yoffset);
             //water.Draw(spriteBatch, xoffset, yoffset);
             
-            arrow.Draw(spriteBatch, Color.White);
+            arrow.Draw(spriteBatch, Color.White, xoffset, yoffset);
             spriteBatch.Draw(crosshair, new Rectangle(Mouse.GetState().X, Mouse.GetState().Y, crosshair.Width, crosshair.Height), Color.White);
-
-
+            for (int i = 0; i < player.positions.Count(); i++)
+            {
+                //if (i == 0)
+                //{
+                //    continue;
+                //}
+                spriteBatch.Draw(ropeTexture, new Vector2(xoffset + (int)player.positions[i].X, yoffset + (int)player.positions[i].Y), new Rectangle(0, 0, fireTexture.Width, fireTexture.Height),
+                    Color.White, player.angles[i], new Vector2(ropeTexture.Width / 2f, ropeTexture.Height / 2f), 1f, SpriteEffects.None, 0f);
+            }
+            if (player.positions.Any())
+            {
+                Console.WriteLine("uu");
+                spriteBatch.Draw(hookTexture, new Vector2(xoffset + (int)player.positions[0].X, yoffset + (int)player.positions[0].Y), new Rectangle(0, 0, hookTexture.Width, hookTexture.Height),
+                    Color.White, player.angles[0] + MathHelper.ToRadians(180), new Vector2(hookTexture.Width / 2f, hookTexture.Height / 2f), 1f, SpriteEffects.None, 0f);
+            }
+            player.positions.Clear();
             spriteBatch.End();
 
 
-            bloomCombineEffect.Parameters["BloomIntensity"].SetValue(5.0f);
-            bloomCombineEffect.Parameters["BaseIntensity"].SetValue(0.4f);
-            bloomCombineEffect.Parameters["BloomSaturation"].SetValue(4.0f);
-            bloomCombineEffect.Parameters["BaseSaturation"].SetValue(0.7f);
-
-            bloomCombineEffect.Parameters["BloomSampler"].SetValue(crosshairTarget);
-            bloomCombineEffect.Parameters["BaseSampler"].SetValue(crosshairTarget);
 
 
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-            bloomCombineEffect.CurrentTechnique.Passes[0].Apply();
-            spriteBatch.End();
+
             GraphicsDevice.SetRenderTarget(null); // Set backbuffer
 
             // Optional: clear screen before final draw

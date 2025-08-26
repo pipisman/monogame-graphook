@@ -43,6 +43,7 @@ namespace graphook
         public Texture2D texture;
         public Texture2D whiteTexture;
         public List<Vector2> positions = [];
+        public List<float> angles = [];
         int av;
         private Random random;
         float b;
@@ -66,19 +67,31 @@ namespace graphook
         private void Move(float q, float triRad, Vector2 center)
         {
             positions = [];
+            angles = [];
 
-            float angle = q;
-            for (int k = 0; k < triRad / 5; k++)
+            float angleDeg = q; // rope direction in degrees
+            int stepSize = 16;
+            double x1 = triRad * Math.Cos(q * pi / 180);
+
+            double y1 = triRad * Math.Sin(q * pi / 180);
+            for (int k = 0; k < triRad / stepSize; k++)
             {
-                double ghX1 = k * 5 * Math.Cos(angle * pi / 180);
 
-                double ghY1 = k * 5 * Math.Sin(angle * pi / 180);
-                
-                positions.Add(new Vector2((float)ghX1 + center.X + random.Next(-1, 2), (float)ghY1 + center.Y + random.Next(-1, 2)));
+                double ghX1 = k * stepSize * Math.Cos(angleDeg * Math.PI / 180);
+                double ghY1 = k * stepSize * Math.Sin(angleDeg * Math.PI / 180);
+
+                float px = (float)(ghX1 + center.X);
+                float py = (float)(ghY1 + center.Y);
+
+                positions.Add(new Vector2(px, py));
+
+                float dx = dcl.Position.X + 6.5f - px;
+                float dy = dcl.Position.Y + 9f - py;
+                //angles.Add((float)Math.Atan2(dy, dx) - 0.2f);
+                angles.Add((float)Math.Atan2(y1 - ghY1, x1 - ghX1));
             }
-            double x1 = triRad * Math.Cos(angle * pi / 180);
 
-            double y1 = triRad * Math.Sin(angle * pi / 180);
+
             float xr = center.X + (float)x1;
             float yr = center.Y + (float)y1;
             Vector2 _a = new Vector2(xr, yr + 16);
@@ -87,7 +100,7 @@ namespace graphook
             Vector2 _d = new Vector2(xr + 16, yr);
             //isActivated = false
             //return
-            
+
             Rectangle a = new Rectangle((int)dcl.Position.X, (int)dcl.Position.Y, 16, 8);
             for (int i = 0; i < collisions.Count; i++)
             {
@@ -100,7 +113,10 @@ namespace graphook
                 }
             }
             prp = dcl.Position;
-            dcl.Position = new Vector2(center.X + (float)x1, center.Y + (float)y1);
+            MathHelper.Lerp(dcl.Position.X, center.X + (float)x1, 0.1f);
+            //dcl.Position = new Vector2(center.X + (float)x1, center.Y + (float)y1);
+            dcl.Position = new Vector2(MathHelper.Lerp(dcl.Position.X, center.X + (float)x1, 0.7f),
+            MathHelper.Lerp(dcl.Position.Y, center.Y + (float)y1, 0.7f));
         }
         public void Update(int xoffset, int yoffset)
         {
@@ -207,7 +223,7 @@ namespace graphook
 
 
                 
-                ray = new raycast(collisions, 125, 5, dcl.Position, new Vector2(worldMouseX, worldMouseY));
+                ray = new raycast(collisions, 175, 1, dcl.Position, new Vector2(worldMouseX, worldMouseY));
 
 
                 if (ray.Collidepoint().collided)
@@ -267,83 +283,36 @@ namespace graphook
 
 
 
-                if (x1 < 0)
+
+                float swingSpeed = 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
+                b += (x1 < 0 ? -swingSpeed : swingSpeed);
+
+                bool release = dcl.colliding 
+                    || currentMouseState.RightButton == ButtonState.Pressed && previousMouseState.RightButton == ButtonState.Released
+                    || (x1 < 0 && b < i - (1000000 - ab / 60))
+                    || (x1 > 0 && b > i + (1000000 - ab / 60));
+
+                if (release)
                 {
-
-
-                    if (dcl.colliding)
-                    {
-                        isActivated = false;
-                        return;
-                    }
-                    b -= 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
-
-
-                    if ((b < i - (1000 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
-                        previousMouseState.RightButton == ButtonState.Released)
-                    {
-
-                        if (dcl.colliding)
-                        {
-                            isActivated = false;
-                            return;
-                        }
-                        float angle = b;
-
-                        double x1 = ab * Math.Cos(angle * pi / 180);
-
-                        double y1 = ab * Math.Sin(angle * pi / 180);
-
-
-
-                        vel2 += new Vector2(ab * (float)pi * 3f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                            center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 3f / 90 * (float)Math.Sin(
-                                (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                                    center.X + (float)x1 - dcl.Position.X)));
-                        isActivated = false;
-
-                    }
-                }
-                else if (x1 > 0)
-                {
-
-                    b += 4f + (5 - ab / 30) + (vel2.X + vel2.Y) / 2 / 30;
-                    //if (b > i + 70)
                     if (dcl.colliding)
                     {
                         isActivated = false;
                         return;
                     }
 
+                    float angle = b;
+                    double xPos = ab * Math.Cos(angle * pi / 180);
+                    double yPos = ab * Math.Sin(angle * pi / 180);
 
+                    float force = ab * (float)pi * 3.5f / 90;
+                    vel2 += new Vector2(
+                        force * (float)Math.Cos(Math.Atan2(center.Y + (float)yPos - dcl.Position.Y, center.X + (float)xPos - dcl.Position.X)),
+                        force * (float)Math.Sin(Math.Atan2(center.Y + (float)yPos - dcl.Position.Y, center.X + (float)xPos - dcl.Position.X))
+                    );
 
-                    if ((b > i + (1000 - ab / 60)) || dcl.colliding || currentMouseState.RightButton == ButtonState.Pressed &&
-                previousMouseState.RightButton == ButtonState.Released)
-                    {
-
-                        {
-                            if (dcl.colliding)
-                            {
-                                isActivated = false;
-                                return;
-                            }
-                            float angle = b;
-
-                            double x1 = ab * Math.Cos(angle * pi / 180);
-
-                            double y1 = ab * Math.Sin(angle * pi / 180);
-
-
-
-                            vel2 += new Vector2(ab * (float)pi * 4f / 90 * (float)Math.Cos((float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                                center.X + (float)x1 - dcl.Position.X)), ab * (float)pi * 4f / 90 * (float)Math.Sin(
-                                    (float)Math.Atan2(center.Y + (float)y1 - dcl.Position.Y,
-                                        center.X + (float)x1 - dcl.Position.X)));
-                            isActivated = false;
-                        }
-
-                    }
+                    isActivated = false;
                 }
+
 
             }
 

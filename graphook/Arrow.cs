@@ -46,8 +46,10 @@ namespace graphook
             Arrows = new List<(Texture2D, Vector2, Rectangle?, Microsoft.Xna.Framework.Color, float, Vector2, float, SpriteEffects, float)>();
 
         }
-        public void Update(Vector2 playerPosition)
+        public void Update(Vector2 playerPosition, int xoffset, int yoffset)
         {
+
+
             previousState = MouseState;
             MouseState = Mouse.GetState();
             if (MouseState.MiddleButton == ButtonState.Pressed && previousState.MiddleButton != ButtonState.Pressed)
@@ -59,7 +61,7 @@ namespace graphook
             {
                 gravitySpeed = 0;
                 Speed -= 0.1f;
-                angle = (float)Math.Atan2(MouseState.Y - Position.Y, MouseState.X - Position.X);
+                angle = (float)Math.Atan2(MouseState.Y - yoffset - Position.Y, MouseState.X - xoffset - Position.X);
             } 
             if (Speed <= 0) gravitySpeed += 0.25f;
             float x = Position.X + Speed * (float)Math.Cos(angle);
@@ -89,15 +91,15 @@ namespace graphook
             }
 
         }
-        public void Draw(SpriteBatch spriteBatch, Microsoft.Xna.Framework.Color color)
+        public void Draw(SpriteBatch spriteBatch, Microsoft.Xna.Framework.Color color, int xoffset, int yoffset)
         {
-            spriteBatch.Draw(arrowTexture, Position, new Rectangle(0, 0, arrowTexture.Width, arrowTexture.Height), color,
+            spriteBatch.Draw(arrowTexture, new Vector2(Position.X + xoffset, Position.Y + yoffset), new Rectangle(0, 0, arrowTexture.Width, arrowTexture.Height), color,
                 angle, new Vector2(arrowTexture.Width / 2f, arrowTexture.Height / 2f), 1.5f, SpriteEffects.None, 0f);
             foreach (var arrow in Arrows)
             {
                 spriteBatch.Draw(
                     arrow.texture,
-                    arrow.position,
+                    new Vector2(arrow.position.X + xoffset, arrow.position.Y + yoffset),
                     arrow.sourceRect,
                     arrow.color,
                     arrow.rotation,
